@@ -1,5 +1,7 @@
 package Main;
 
+import java.util.ArrayList;
+
 public class GeneticGenerator 
 {
 	NeuralNet[] networkList;
@@ -8,12 +10,19 @@ public class GeneticGenerator
 	final double weightRandomness = 1;
 	final int repetitionToModify = 10;
 	final double scoreRange = .5;
+	private double worstScore = 0;
+	private final int numChildren = 1;
 	
 	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork)
 	{
 		bestNetwork = startingNetwork;
 		bestScore = data.testNetwork(startingNetwork);
 		networkList = new NeuralNet[numNetworks];
+		for(int i = 0;i<networkList.length;i++)
+		{
+			networkList[i] = startingNetwork.getCopy();
+			randomizeNetworkWeightsAndBiases(networkList[i]);
+		}
 		long t = System.currentTimeMillis();
 		trainNetwork(data);
 		t=System.currentTimeMillis()-t;
@@ -22,15 +31,20 @@ public class GeneticGenerator
 	
 	private void trainNetwork(TrainingData data)
 	{
+		worstScore = 0;
 		double scoreTracker = 10000000;
 		int cnt = 0;
 		while (bestScore > 0)
 		{
+			//Test Networks
+			testNetworks(data);
+			ArrayList<NeuralNet> networks = removeFailures();
+			reproduceNetworks(networks);
+			
 			for(int i = 0;i<networkList.length;i++)
 			{
 				randomizeNetworkWeightsAndBiases(networkList[i]);
 			}
-			testNetworks(data);
 			if(bestScore != scoreTracker)
 			{
 				cnt = 0;
@@ -44,15 +58,22 @@ public class GeneticGenerator
 		}
 	}
 	
-	private void removeFailures()
+	private void reproduceNetworks(ArrayList<NeuralNet> networks)
 	{
+		
+	}
+	
+	private ArrayList<NeuralNet> removeFailures()
+	{
+		ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
 		for(int i = 0;i<networkList.length;i++)
 		{
-			if(networkList[i].score>bestScore+scoreRange)
+			if(networkList[i].score<bestScore+scoreRange)
 			{
-				
+				passingNetworks.add(networkList[i]);
 			}
 		}
+		return passingNetworks;
 	}
 	
 	private void testNetworks(TrainingData data)
@@ -65,6 +86,10 @@ public class GeneticGenerator
 			{
 				bestScore = score;
 				bestNetwork = networkList[i].getCopy();
+			}
+			else if(score > worstScore)
+			{
+				worstScore = score;
 			}
 		}
 		System.out.println(bestScore);

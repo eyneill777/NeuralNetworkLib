@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class NeuralNet 
 {
 	ArrayList<Layer> layerList = new ArrayList<Layer>();
-	double outputThreshold = 1.0;
+	double outputThreshold = .9;
 	double score = -1;
 	
 	public NeuralNet()
@@ -21,9 +21,8 @@ public class NeuralNet
 		}
 	}
 	
-	public NeuralNet(int[] layerSizes, double outputThreshold)
+	public NeuralNet(int[] layerSizes)
 	{
-		this.outputThreshold = outputThreshold;
 		for(int i = 0;i<layerSizes.length;i++)
 		{
 			layerList.add(new Layer(layerSizes[i]));
@@ -44,6 +43,8 @@ public class NeuralNet
 		{
 			if(layerList.get(layerList.size()-1).nodeList.get(i).value > outputThreshold)
 				layerList.get(layerList.size()-1).nodeList.get(i).value = 1;
+			else if(layerList.get(layerList.size()-1).nodeList.get(i).value < 1-outputThreshold)
+				layerList.get(layerList.size()-1).nodeList.get(i).value = 0;
 		}
 	}
 	

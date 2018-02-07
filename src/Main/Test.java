@@ -4,7 +4,7 @@ public class Test
 {
 	public static void main(String[] args)
 	{
-		NeuralNet network = new NeuralNet(new int[]{2,3,1}, .8);
+		NeuralNet network = new NeuralNet(new int[]{2,3,1});
 		/**
 		for(Layer l:network.layerList)
 		{
