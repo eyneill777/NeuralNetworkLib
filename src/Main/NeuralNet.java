@@ -33,6 +33,24 @@ public class NeuralNet
 		}
 	}
 	
+	public NeuralNet breedWithNetwork(NeuralNet network2)
+	{
+		NeuralNet mixedNetwork = getCopy();
+		for(int i = 0;i<layerList.size();i++)
+		{
+			Layer layer1 = mixedNetwork.layerList.get(i);
+			if(i<network2.layerList.size())
+			{
+				layer1.mixLayer(network2.layerList.get(i));
+			}
+			else
+			{
+				System.out.println("TODO Error: too many layers.  See NeuralNet.breedWithNetwork");
+			}
+		}
+		return network2;
+	}
+	
 	public void propigateNetwork()
 	{
 		for(int i = 1;i<layerList.size();i++)

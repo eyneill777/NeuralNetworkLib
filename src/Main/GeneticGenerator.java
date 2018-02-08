@@ -8,10 +8,10 @@ public class GeneticGenerator
 	NeuralNet bestNetwork;
 	double bestScore;
 	final double weightRandomness = 1;
-	final int repetitionToModify = 10;
-	final double scoreRange = .5;
+	final int repetitionToModify = 80;
+	double scoreRange = .5;
 	private double worstScore = 0;
-	private final int numChildren = 1;
+	boolean verbose = false;
 	
 	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork)
 	{
@@ -38,13 +38,14 @@ public class GeneticGenerator
 		{
 			//Test Networks
 			testNetworks(data);
+			//Adjust minimum fitness for survival
+			scoreRange = (worstScore-bestScore)/2/(networkList.length/1000.0);
+			//Remove unfit candidates
 			ArrayList<NeuralNet> networks = removeFailures();
+			//breed fit candidates
 			reproduceNetworks(networks);
 			
-			for(int i = 0;i<networkList.length;i++)
-			{
-				randomizeNetworkWeightsAndBiases(networkList[i]);
-			}
+			//update stats
 			if(bestScore != scoreTracker)
 			{
 				cnt = 0;
@@ -60,19 +61,41 @@ public class GeneticGenerator
 	
 	private void reproduceNetworks(ArrayList<NeuralNet> networks)
 	{
-		
+		int len = networks.size();
+		for(int i = 1;i<len;i++)
+		{
+			NeuralNet n = networks.get(i).breedWithNetwork(networks.get(i-1));
+			randomizeNetworkWeightsAndBiases(n);
+			networks.add(n);
+		}
+		networkList = new NeuralNet[networks.size()];
+		for(int i = 0;i<networks.size();i++)
+		{
+			networkList[i] = networks.get(i).getCopy();
+		}
+		if(verbose)
+			System.out.println("Size "+networkList.length);
 	}
 	
 	private ArrayList<NeuralNet> removeFailures()
 	{
+		if(verbose)
+			System.out.println(bestScore+" "+scoreRange+" "+worstScore);
+		int remCount = 0;
 		ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
 		for(int i = 0;i<networkList.length;i++)
 		{
-			if(networkList[i].score<bestScore+scoreRange)
+			if(networkList[i] != null && networkList[i].score<bestScore+scoreRange)
 			{
 				passingNetworks.add(networkList[i]);
 			}
+			else
+			{
+				remCount++;
+			}
 		}
+		if(verbose)
+			System.out.println(remCount+" networks removed");
 		return passingNetworks;
 	}
 	
@@ -80,19 +103,24 @@ public class GeneticGenerator
 	{
 		for(int i = 0;i<networkList.length;i++)
 		{
-			double score = data.testNetwork(networkList[i]);
-			networkList[i].score = score;
-			if(score < bestScore)
+			if(networkList[i] == null)
+				System.out.println("Null network "+i);
 			{
-				bestScore = score;
-				bestNetwork = networkList[i].getCopy();
-			}
-			else if(score > worstScore)
-			{
-				worstScore = score;
+				double score = data.testNetwork(networkList[i]);
+				networkList[i].score = score;
+				if(score < bestScore)
+				{
+					bestScore = score;
+					bestNetwork = networkList[i].getCopy();
+				}
+				else if(score > worstScore)
+				{
+					worstScore = score;
+				}
 			}
 		}
-		System.out.println(bestScore);
+		if(!verbose)
+			System.out.println(bestScore);
 	}
 	
 	private void randomizeNetworkWeightsAndBiases(NeuralNet network)
