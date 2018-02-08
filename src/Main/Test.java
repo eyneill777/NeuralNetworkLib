@@ -1,7 +1,15 @@
 package Main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class Test 
 {
+	private static ArrayList<Long> runtimes = new ArrayList<Long>();
+	private static final int numTests = 1;
+	
 	public static void main(String[] args)
 	{
 		NeuralNet network = new NeuralNet(new int[]{2,2,1});
@@ -42,11 +50,6 @@ public class Test
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[1]);
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[2]);
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[3]);
-		
-		///NetworkDisplay.displayNetwork(network, inputData[0]);
-		///NetworkDisplay.displayNetwork(network, inputData[1]);
-		//NetworkDisplay.displayNetwork(network, inputData[2]);
-		//NetworkDisplay.displayNetwork(network, inputData[3]);
 		
 		
 	}

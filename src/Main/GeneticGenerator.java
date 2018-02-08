@@ -11,7 +11,8 @@ public class GeneticGenerator
 	final int repetitionToModify = 80;
 	double scoreRange = .5;
 	private double worstScore = 0;
-	boolean verbose = false;
+	boolean verbose = true;
+	final int maxNetworks = 100000;
 	
 	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork)
 	{
@@ -39,7 +40,12 @@ public class GeneticGenerator
 			//Test Networks
 			testNetworks(data);
 			//Adjust minimum fitness for survival
-			scoreRange = (worstScore-bestScore)/2/(networkList.length/1000.0);
+			double sizeModifier;
+			if(networkList.length > maxNetworks)
+				sizeModifier = networkList.length/1;
+			else 
+				sizeModifier = networkList.length/1000.0;
+			scoreRange = (worstScore-bestScore)/2/(sizeModifier);
 			//Remove unfit candidates
 			ArrayList<NeuralNet> networks = removeFailures();
 			//breed fit candidates
