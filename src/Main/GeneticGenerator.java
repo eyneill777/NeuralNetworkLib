@@ -7,12 +7,12 @@ public class GeneticGenerator
 	NeuralNet[] networkList;
 	NeuralNet bestNetwork;
 	double bestScore;
-	final double weightRandomness = 1;
-	final int repetitionToModify = 80;
+	final double weightRandomness = 10;
+	final int repetitionToModify = 30;
 	double scoreRange = .5;
 	private double worstScore = 0;
-	boolean verbose = true;
-	final int maxNetworks = 100000;
+	boolean verbose = false;
+	final int maxNetworks = 50000, minNetworks = 10;
 	
 	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork)
 	{
@@ -40,16 +40,14 @@ public class GeneticGenerator
 			//Test Networks
 			testNetworks(data);
 			//Adjust minimum fitness for survival
-			double sizeModifier;
-			if(networkList.length > maxNetworks)
-				sizeModifier = networkList.length/1;
-			else 
-				sizeModifier = networkList.length/1000.0;
+			double sizeModifier = networkList.length/1000.0;
 			scoreRange = (worstScore-bestScore)/2/(sizeModifier);
 			//Remove unfit candidates
 			ArrayList<NeuralNet> networks = removeFailures();
 			//breed fit candidates
 			reproduceNetworks(networks);
+			//If there are too many networks kill randomly
+			cullPopulation();
 			
 			//update stats
 			if(bestScore != scoreTracker)
@@ -60,6 +58,7 @@ public class GeneticGenerator
 			else if(cnt >= repetitionToModify)
 			{
 				System.out.println("test");
+				cnt = 0;
 			}
 			cnt++;
 		}
@@ -91,7 +90,7 @@ public class GeneticGenerator
 		ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
 		for(int i = 0;i<networkList.length;i++)
 		{
-			if(networkList[i] != null && networkList[i].score<bestScore+scoreRange)
+			if(networkList[i].score<bestScore+scoreRange || remCount >= networkList.length-minNetworks)
 			{
 				passingNetworks.add(networkList[i]);
 			}
@@ -103,6 +102,26 @@ public class GeneticGenerator
 		if(verbose)
 			System.out.println(remCount+" networks removed");
 		return passingNetworks;
+	}
+	
+	private void cullPopulation()
+	{
+		if(networkList.length > maxNetworks)
+		{
+			ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
+			for(int i = 0;i<maxNetworks/2;i++)
+			{
+				int n = (int) (Math.random()*networkList.length);
+				passingNetworks.add(networkList[n]);
+			}
+			networkList = new NeuralNet[passingNetworks.size()];
+			for(int i = 0;i<passingNetworks.size();i++)
+			{
+				networkList[i] = passingNetworks.get(i).getCopy();
+			}
+			if(verbose)
+				System.out.println("Networks Culled");
+		}
 	}
 	
 	private void testNetworks(TrainingData data)
