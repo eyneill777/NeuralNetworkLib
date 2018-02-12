@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class GeneticGenerator 
 {
 	NeuralNet[] networkList;
+	ThreadWrapper[] threadList;
 	NeuralNet bestNetwork;
 	double bestScore;
 	final double weightRandomness = 10;
@@ -19,10 +20,12 @@ public class GeneticGenerator
 		bestNetwork = startingNetwork;
 		bestScore = data.testNetwork(startingNetwork);
 		networkList = new NeuralNet[numNetworks];
+		threadList = new ThreadWrapper[networkList.length];
 		for(int i = 0;i<networkList.length;i++)
 		{
 			networkList[i] = startingNetwork.getCopy();
 			randomizeNetworkWeightsAndBiases(networkList[i]);
+			threadList[i] = new ThreadWrapper(networkList[i], data);
 		}
 		long t = System.currentTimeMillis();
 		trainNetwork(data);
@@ -126,21 +129,33 @@ public class GeneticGenerator
 	
 	private void testNetworks(TrainingData data)
 	{
+		threadList = new ThreadWrapper[networkList.length];
+		for(int i = 0;i<networkList.length;i++)
+		{
+			threadList[i] = new ThreadWrapper(networkList[i], data);
+			threadList[i].start();
+			try {
+				threadList[i].join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		for(int i = 0;i<networkList.length;i++)
 		{
 			if(networkList[i] == null)
 				System.out.println("Null network "+i);
+			else
 			{
-				double score = data.testNetwork(networkList[i]);
-				networkList[i].score = score;
-				if(score < bestScore)
+				if(networkList[i].score < bestScore)
 				{
-					bestScore = score;
+					bestScore = networkList[i].score;
 					bestNetwork = networkList[i].getCopy();
 				}
-				else if(score > worstScore)
+				else if(networkList[i].score > worstScore)
 				{
-					worstScore = score;
+					worstScore = networkList[i].score;
 				}
 			}
 		}

@@ -13,6 +13,7 @@ public class ThreadWrapper extends Thread
 	
 	public void run()
 	{
-		
+		double score = data.testNetwork(network);
+		network.score = score;
 	}
 }
