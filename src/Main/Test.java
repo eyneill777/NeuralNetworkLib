@@ -9,7 +9,7 @@ public class Test
 {
 	private static long[] runtimes = new long[100];
 	private static final int numTests = 1;
-	private static final long maxRunTimeForHistogram = 500;
+	private static final long maxRunTimeForHistogram = 8000;
 	
 	public static void main(String[] args)
 	{
@@ -47,13 +47,13 @@ public class Test
 				runtimes[runtimes.length-1]++;
 		}
 		
-		/**
+		
 		System.out.println("Run Times:");
 		for(int i = 0;i<100;i++)
 		{
 			System.out.println(runtimes[i]);
 		}
-		**/
+		
 		
 		/**
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[0]);

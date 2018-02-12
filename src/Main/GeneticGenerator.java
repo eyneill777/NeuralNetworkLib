@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class GeneticGenerator 
 {
-	NeuralNet[] networkList;
 	ThreadWrapper[] threadList;
 	NeuralNet bestNetwork;
 	double bestScore;
@@ -19,13 +18,11 @@ public class GeneticGenerator
 	{
 		bestNetwork = startingNetwork;
 		bestScore = data.testNetwork(startingNetwork);
-		networkList = new NeuralNet[numNetworks];
-		threadList = new ThreadWrapper[networkList.length];
-		for(int i = 0;i<networkList.length;i++)
+		threadList = new ThreadWrapper[numNetworks];
+		for(int i = 0;i<threadList.length;i++)
 		{
-			networkList[i] = startingNetwork.getCopy();
-			randomizeNetworkWeightsAndBiases(networkList[i]);
-			threadList[i] = new ThreadWrapper(networkList[i], data);
+			threadList[i] = new ThreadWrapper(startingNetwork.getCopy(), data, i);
+			randomizeNetworkWeightsAndBiases(threadList[i].network);
 		}
 		long t = System.currentTimeMillis();
 		trainNetwork(data);
@@ -40,17 +37,18 @@ public class GeneticGenerator
 		int cnt = 0;
 		while (bestScore > 0)
 		{
+			
 			//Test Networks
 			testNetworks(data);
 			//Adjust minimum fitness for survival
-			double sizeModifier = networkList.length/1000.0;
+			double sizeModifier = threadList.length/1000.0;
 			scoreRange = (worstScore-bestScore)/2/(sizeModifier);
 			//Remove unfit candidates
 			ArrayList<NeuralNet> networks = removeFailures();
 			//breed fit candidates
-			reproduceNetworks(networks);
+			reproduceNetworks(networks, data);
 			//If there are too many networks kill randomly
-			cullPopulation();
+			cullPopulation(data);
 			
 			//update stats
 			if(bestScore != scoreTracker)
@@ -67,7 +65,7 @@ public class GeneticGenerator
 		}
 	}
 	
-	private void reproduceNetworks(ArrayList<NeuralNet> networks)
+	private void reproduceNetworks(ArrayList<NeuralNet> networks, TrainingData data)
 	{
 		int len = networks.size();
 		for(int i = 1;i<len;i++)
@@ -76,13 +74,13 @@ public class GeneticGenerator
 			randomizeNetworkWeightsAndBiases(n);
 			networks.add(n);
 		}
-		networkList = new NeuralNet[networks.size()];
+		threadList = new ThreadWrapper[networks.size()];
 		for(int i = 0;i<networks.size();i++)
 		{
-			networkList[i] = networks.get(i).getCopy();
+			threadList[i] = new ThreadWrapper(networks.get(i).getCopy(), data, i);
 		}
 		if(verbose)
-			System.out.println("Size "+networkList.length);
+			System.out.println("Size "+threadList.length);
 	}
 	
 	private ArrayList<NeuralNet> removeFailures()
@@ -91,11 +89,11 @@ public class GeneticGenerator
 			System.out.println(bestScore+" "+scoreRange+" "+worstScore);
 		int remCount = 0;
 		ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
-		for(int i = 0;i<networkList.length;i++)
+		for(int i = 0;i<threadList.length;i++)
 		{
-			if(networkList[i].score<bestScore+scoreRange || remCount >= networkList.length-minNetworks)
+			if(threadList[i].network.score<bestScore+scoreRange || remCount >= threadList.length-minNetworks)
 			{
-				passingNetworks.add(networkList[i]);
+				passingNetworks.add(threadList[i].network);
 			}
 			else
 			{
@@ -107,20 +105,20 @@ public class GeneticGenerator
 		return passingNetworks;
 	}
 	
-	private void cullPopulation()
+	private void cullPopulation(TrainingData data)
 	{
-		if(networkList.length > maxNetworks)
+		if(threadList.length > maxNetworks)
 		{
 			ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
 			for(int i = 0;i<maxNetworks/2;i++)
 			{
-				int n = (int) (Math.random()*networkList.length);
-				passingNetworks.add(networkList[n]);
+				int n = (int) (Math.random()*threadList.length);
+				passingNetworks.add(threadList[n].network);
 			}
-			networkList = new NeuralNet[passingNetworks.size()];
+			threadList = new ThreadWrapper[passingNetworks.size()];
 			for(int i = 0;i<passingNetworks.size();i++)
 			{
-				networkList[i] = passingNetworks.get(i).getCopy();
+				threadList[i] = new ThreadWrapper(passingNetworks.get(i).getCopy(), data, i);
 			}
 			if(verbose)
 				System.out.println("Networks Culled");
@@ -129,10 +127,9 @@ public class GeneticGenerator
 	
 	private void testNetworks(TrainingData data)
 	{
-		threadList = new ThreadWrapper[networkList.length];
-		for(int i = 0;i<networkList.length;i++)
+		long t = System.currentTimeMillis();
+		for(int i = 0;i<threadList.length;i++)
 		{
-			threadList[i] = new ThreadWrapper(networkList[i], data);
 			threadList[i].start();
 			try {
 				threadList[i].join();
@@ -142,23 +139,28 @@ public class GeneticGenerator
 			}
 		}
 		
-		for(int i = 0;i<networkList.length;i++)
+		t = System.currentTimeMillis()-t;
+		System.out.println("t "+t);
+		
+		for(int i = 0;i<threadList.length;i++)
 		{
-			if(networkList[i] == null)
+			if(threadList[i].network == null)
 				System.out.println("Null network "+i);
 			else
 			{
-				if(networkList[i].score < bestScore)
+				if(threadList[i].network.score < bestScore)
 				{
-					bestScore = networkList[i].score;
-					bestNetwork = networkList[i].getCopy();
+					bestScore = threadList[i].network.score;
+					bestNetwork = threadList[i].network.getCopy();
 				}
-				else if(networkList[i].score > worstScore)
+				else if(threadList[i].network.score > worstScore)
 				{
-					worstScore = networkList[i].score;
+					worstScore = threadList[i].network.score;
 				}
 			}
 		}
+		
+		
 		if(!verbose)
 			System.out.println(bestScore);
 	}

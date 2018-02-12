@@ -31,4 +31,10 @@ public class TrainingData
 		
 		return error;
 	}
+	
+	public TrainingData getCopy()
+	{
+		TrainingData data = new TrainingData(inputData, expectedOutputData);
+		return data;
+	}
 }
