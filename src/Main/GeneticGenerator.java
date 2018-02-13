@@ -9,6 +9,7 @@
   	NeuralNet bestNetwork;
   	double bestScore;
  	boolean verbose = false;
+ 	final double tol = 0.001;
   	
   	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands)
   	{
@@ -20,8 +21,9 @@
  			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks);
  		}
  		
- 		while(bestScore > 0)
+ 		while(bestScore > tol)
  		{
+ 				System.out.println("test "+bestScore);
  			for(int i = 0;i<numIslands;i++)
  	 		{
  	 			ThreadWrapper w = new ThreadWrapper(islands[i], islands[i].data, i);
@@ -41,8 +43,9 @@
  				}
  			}
  			System.out.println("Total best score "+ bestScore);
- 			if(bestScore == 0)
+ 			if(bestScore < tol)
  				System.out.println("test");
+ 			System.out.println();
  		}
  	}
  }

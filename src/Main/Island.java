@@ -30,9 +30,6 @@ public class Island
  			networkList[i] = startingNetwork.getCopy();
  			randomizeNetworkWeightsAndBiases(networkList[i]);
  		}
- 		long t = System.currentTimeMillis();
- 		t=System.currentTimeMillis()-t;
- 		System.out.println("time: "+t);
 	}
 	
 	public double trainNetwork()

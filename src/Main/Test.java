@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Test 
 {
 	private static long[] runtimes = new long[100];
-	private static final int numTests = 100;
+	private static final int numTests = 1;
 	private static final long maxRunTimeForHistogram = 400;
 	
 	public static void main(String[] args)
