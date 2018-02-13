@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class Test 
 {
 	private static long[] runtimes = new long[100];
-	private static final int numTests = 1;
-	private static final long maxRunTimeForHistogram = 8000;
+	private static final int numTests = 100;
+	private static final long maxRunTimeForHistogram = 400;
 	
 	public static void main(String[] args)
 	{
@@ -37,7 +37,7 @@ public class Test
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			GeneticGenerator generator = new GeneticGenerator(trainingData, 1000, network);
+			GeneticGenerator generator = new GeneticGenerator(trainingData, 1000, network, 1);
 			t = System.currentTimeMillis()-t;
 			if(t<maxRunTimeForHistogram)
 			{

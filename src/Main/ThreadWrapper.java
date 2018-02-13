@@ -2,21 +2,20 @@ package Main;
 
 public class ThreadWrapper extends Thread
 {
-	NeuralNet network;
+	Island island;
 	TrainingData data;
 	int threadIndex;
 	
-	public ThreadWrapper(NeuralNet network, TrainingData data, int threadIndex)
+	public ThreadWrapper(Island island, TrainingData data, int threadIndex)
 	{
-		this.network = network;
 		this.data = data;
 		this.threadIndex = threadIndex;
+		this.island = island;
 	}
 	
 	public void run()
 	{
-		double score = data.testNetwork(network);
-		 network.score = score;
-		//System.out.println("Thread Index "+threadIndex);
+		island.trainNetwork();
+		System.out.println("Island "+threadIndex);
 	}
 }
