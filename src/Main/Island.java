@@ -15,6 +15,7 @@ public class Island
   	public double worstScore = 0;
  	boolean verbose;
  	final int maxNetworks = 50000, minNetworks = 10;
+ 	public ThreadWrapper wrapper;
 	
 	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks)
 	{
@@ -70,8 +71,8 @@ public class Island
 			}
 		}
 		
-		if(!verbose)
- 			System.out.println(bestScore);
+		if(verbose)
+ 			System.out.println("Island "+ islandNo+" : "+bestScore);
 	}
 	
 	private void reproduceNetworks(ArrayList<NeuralNet> networks)
@@ -152,4 +153,19 @@ public class Island
  			}
  		}
  	}
+	
+	public void mixWith(Island island, NeuralNet topNetwork, double topScore)
+	{
+		int mixCount = networkList.length;
+		for(int i = 0;i<mixCount;i++)
+		{
+			int j = (int) (Math.random()*(networkList.length-1));
+			int k = (int) (Math.random()*(island.networkList.length-1));
+			if(networkList[j].score>island.networkList[k].score)
+				networkList[j] = island.networkList[k];
+		}
+		networkList[0] = topNetwork.getCopy();
+		bestNetwork = networkList[0];
+		bestScore = topScore;
+	}
 }

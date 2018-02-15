@@ -8,8 +8,9 @@ import java.util.ArrayList;
 public class Test 
 {
 	private static long[] runtimes = new long[100];
-	private static final int numTests = 1;
+	private static final int numTests = 1000;
 	private static final long maxRunTimeForHistogram = 400;
+	private static long totTime = 0;
 	
 	public static void main(String[] args)
 	{
@@ -37,8 +38,10 @@ public class Test
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			GeneticGenerator generator = new GeneticGenerator(trainingData, 1000, network, 1);
+			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 6);
 			t = System.currentTimeMillis()-t;
+			System.out.println("time " +t);
+			totTime+=t;
 			if(t<maxRunTimeForHistogram)
 			{
 				runtimes[(int) (t*100/maxRunTimeForHistogram)] +=1;
@@ -47,7 +50,8 @@ public class Test
 				runtimes[runtimes.length-1]++;
 		}
 		
-		
+		long avg = totTime/numTests;
+		System.out.println("average runtime "+avg);
 		System.out.println("Run Times:");
 		for(int i = 0;i<100;i++)
 		{

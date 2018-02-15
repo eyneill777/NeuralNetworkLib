@@ -16,6 +16,5 @@ public class ThreadWrapper extends Thread
 	public void run()
 	{
 		island.trainNetwork();
-		System.out.println("Island "+threadIndex);
 	}
 }

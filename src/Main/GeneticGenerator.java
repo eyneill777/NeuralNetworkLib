@@ -8,8 +8,8 @@
   	int numIslands;
   	NeuralNet bestNetwork;
   	double bestScore;
+  	final int syncFrequency = 1;
  	boolean verbose = false;
- 	final double tol = 0.001;
   	
   	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands)
   	{
@@ -21,19 +21,26 @@
  			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks);
  		}
  		
- 		while(bestScore > tol)
+ 		int syncCount = 0;
+ 		while(bestScore > 0)
  		{
- 				System.out.println("test "+bestScore);
+ 			if(syncCount >= syncFrequency)
+ 				mixIslands();
+ 			
  			for(int i = 0;i<numIslands;i++)
  	 		{
  	 			ThreadWrapper w = new ThreadWrapper(islands[i], islands[i].data, i);
+ 	 			islands[i].wrapper = w;
  	 			w.start();
- 	 			try {
-					w.join();
+ 	 		}
+ 			for(int i = 0;i<numIslands;i++)
+ 			{
+	 			try {
+					islands[i].wrapper.join();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
- 	 		}
+ 			}
  			for(int i = 0;i<numIslands;i++)
  			{
  				if(bestScore > islands[i].bestScore)
@@ -42,10 +49,22 @@
  					bestNetwork = islands[i].bestNetwork.getCopy();
  				}
  			}
+ 			
+ 			syncCount++;
  			System.out.println("Total best score "+ bestScore);
- 			if(bestScore < tol)
- 				System.out.println("test");
  			System.out.println();
  		}
  	}
+  	
+  	private void mixIslands()
+  	{
+  		for(int i = 0;i<islands.length;i++)
+  		{
+  			for(int j = 0;j<islands.length;j++)
+  			{
+  				if(i != j)
+  					islands[i].mixWith(islands[j], bestNetwork, bestScore);
+  			}
+  		}
+  	}
  }
