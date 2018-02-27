@@ -19,6 +19,9 @@ public class TrainingData
 			for(int j = 0;j<inputData[i].length;j++)
 			{
 				this.inputData[i][j] = inputData[i][j];
+			}
+			for(int j = 0;j<expectedOutputData[i].length;j++)
+			{
 				this.expectedOutputData[i][j] = expectedOutputData[i][j];
 			}
 		}

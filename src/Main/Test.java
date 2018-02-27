@@ -39,7 +39,8 @@ public class Test
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 1);
+			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 1, false);
+			generator.trainNetwork();
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);
 			totTime+=t;
