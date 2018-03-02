@@ -52,6 +52,7 @@ public class NeuralNet
 				layerList.add(l);
 				
 				String[] separateConnectionsAndBias = s.split(";");
+				
 			}
 			scanner.close();
 		} catch (FileNotFoundException e) 
