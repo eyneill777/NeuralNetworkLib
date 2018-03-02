@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Test 
 {
 	private static long[] runtimes = new long[100];
-	private static final int numTests = 1000;
+	private static final int numTests = 1;
 	private static final long maxRunTimeForHistogram = 400;
 	private static long totTime = 0;
 	
@@ -35,10 +35,12 @@ public class Test
 			runtimes[i] = 0;
 		}
 		
+		GeneticGenerator generator = null;
+		
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 6);
+			generator = new GeneticGenerator(trainingData, 100, network, 2);
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);
 			totTime+=t;
@@ -50,6 +52,9 @@ public class Test
 				runtimes[runtimes.length-1]++;
 		}
 		
+		generator.bestNetwork.saveNetwork("src/SavedNetworks/XOR.dat");
+		network = new NeuralNet("src/SavedNetworks/XOR.dat");
+		
 		long avg = totTime/numTests;
 		System.out.println("average runtime "+avg);
 		System.out.println("Run Times:");
@@ -57,7 +62,6 @@ public class Test
 		{
 			System.out.println(runtimes[i]);
 		}
-		
 		
 		/**
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[0]);
