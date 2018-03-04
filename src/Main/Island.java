@@ -14,7 +14,7 @@ public class Island
   	double scoreRange = .5;
   	public double worstScore = 0;
  	boolean verbose;
- 	final int maxNetworks = 50000, minNetworks = 10;
+ 	final int maxNetworks = 10, minNetworks = 3;
  	public ThreadWrapper wrapper;
 	
 	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks)
@@ -36,7 +36,7 @@ public class Island
 	public double trainNetwork()
  	{
   		//Adjust minimum fitness for survival
- 		double sizeModifier = networkList.length/1000.0;
+ 		double sizeModifier = networkList.length/(maxNetworks*1.0);
   		scoreRange = (worstScore-bestScore)/2/(sizeModifier);
   		//Remove unfit candidates
   		ArrayList<NeuralNet> networks = removeFailures();

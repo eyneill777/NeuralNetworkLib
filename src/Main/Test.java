@@ -7,8 +7,9 @@ import java.util.ArrayList;
 
 public class Test 
 {
-	private static long[] runtimes = new long[100];
-	private static final int numTests = 1;
+	private static int histResolution = 300;
+	private static long[] runtimes = new long[histResolution];
+	private static final int numTests = 1000;
 	private static final long maxRunTimeForHistogram = 400;
 	private static long totTime = 0;
 	
@@ -30,38 +31,35 @@ public class Test
 		
 		TrainingData trainingData = new TrainingData(inputData, expectedOutputData);
 		
-		for(int i = 0;i<100;i++)
+		for(int i = 0;i<histResolution;i++)
 		{
 			runtimes[i] = 0;
 		}
 		
-		GeneticGenerator generator = null;
-		
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			generator = new GeneticGenerator(trainingData, 100, network, 2);
+			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 1, false);
+			generator.trainNetwork();
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);
 			totTime+=t;
 			if(t<maxRunTimeForHistogram)
 			{
-				runtimes[(int) (t*100/maxRunTimeForHistogram)] +=1;
+				runtimes[(int) (t*histResolution/maxRunTimeForHistogram)] +=1;
 			}
 			else
 				runtimes[runtimes.length-1]++;
 		}
 		
-		generator.bestNetwork.saveNetwork("src/SavedNetworks/XOR.dat");
-		network = new NeuralNet("src/SavedNetworks/XOR.dat");
-		
 		long avg = totTime/numTests;
 		System.out.println("average runtime "+avg);
 		System.out.println("Run Times:");
-		for(int i = 0;i<100;i++)
+		for(int i = 0;i<histResolution;i++)
 		{
 			System.out.println(runtimes[i]);
 		}
+		
 		
 		/**
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[0]);

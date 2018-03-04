@@ -11,17 +11,22 @@
   	final int syncFrequency = 1;
  	boolean verbose = false;
   	
-  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands)
+  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose)
   	{
+  		this.verbose = verbose;
  		bestScore = data.testNetwork(startingNetwork);
  		islands = new Island[numIslands];
+ 		this.numIslands = numIslands;
  		
  		for(int i = 0;i<numIslands;i++)
  		{
  			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks);
  		}
- 		
- 		int syncCount = 0;
+ 	}
+  	
+  	public void trainNetwork()
+  	{
+  		int syncCount = 0;
  		while(bestScore > 0)
  		{
  			if(syncCount >= syncFrequency)
@@ -54,7 +59,7 @@
  			System.out.println("Total best score "+ bestScore);
  			System.out.println();
  		}
- 	}
+  	}
   	
   	private void mixIslands()
   	{

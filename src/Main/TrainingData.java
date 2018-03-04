@@ -10,6 +10,23 @@ public class TrainingData
 		this.expectedOutputData = expectedOutputData;
 	}
 	
+	public TrainingData(Double[][] inputData, Double[][] expectedOutputData) 
+	{
+		this.inputData = new double[inputData.length][inputData[0].length];
+		this.expectedOutputData = new double[expectedOutputData.length][expectedOutputData[0].length];
+		for(int i = 0;i<inputData.length;i++)
+		{
+			for(int j = 0;j<inputData[i].length;j++)
+			{
+				this.inputData[i][j] = inputData[i][j];
+			}
+			for(int j = 0;j<expectedOutputData[i].length;j++)
+			{
+				this.expectedOutputData[i][j] = expectedOutputData[i][j];
+			}
+		}
+	}
+
 	public double testNetwork(NeuralNet network)
 	{
 		double error = 0;
