@@ -1,6 +1,11 @@
 package Main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class NeuralNet 
 {
@@ -30,6 +35,29 @@ public class NeuralNet
 			{
 				layerList.get(i).connectLayer(layerList.get(i-1));
 			}
+		}
+	}
+	
+	public NeuralNet(String filePath)
+	{
+		File file = new File(filePath);
+		try 
+		{
+			Scanner scanner = new Scanner(file);
+			layerList = new ArrayList<Layer>();
+			while(scanner.hasNextLine())
+			{
+				String s = scanner.nextLine();
+				Layer l = new Layer();
+				layerList.add(l);
+				
+				String[] separateConnectionsAndBias = s.split(";");
+				
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) 
+		{
+				e.printStackTrace();
 		}
 	}
 	
@@ -86,6 +114,29 @@ public class NeuralNet
 	
 	public void saveNetwork(String filePath)//TODO
 	{
-		
+		File file = new File(filePath);
+		try 
+		{
+			int a = 0;
+			FileWriter writer = new FileWriter(file);
+			for(Layer l:layerList)
+			{
+				for(Node n:l.nodeList)
+				{
+					writer.write(n.bias+"");
+					for(Connection con:n.connectionList)
+					{
+						writer.write(";"+con.getSaveString(layerList.get(a-1)));
+					}
+					writer.write(",");
+				}
+				a++;
+				writer.write("\n");
+				writer.flush();
+			}
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

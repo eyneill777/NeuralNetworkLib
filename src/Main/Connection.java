@@ -19,4 +19,13 @@ public class Connection
 		node2 = n2;
 		this.weight = weight;
 	}
+	
+	public String getSaveString(Layer prevLayer)//return the string form of this connection for saving
+	{
+		String s = ""; 
+		s+=weight;
+		s+=":";
+		s+=prevLayer.nodeList.indexOf(node1);
+		return s;
+	}
 }
