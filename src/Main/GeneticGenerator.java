@@ -10,24 +10,29 @@
   	double bestScore;
   	final int syncFrequency = 1;
  	boolean verbose = false;
+ 	int passingScore;
+ 	int maxNetworks, minNetworks;
   	
-  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose)
+  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks)
   	{
+  		this.maxNetworks = maxNetworks;
+  		this.minNetworks = minNetworks;
   		this.verbose = verbose;
  		bestScore = data.testNetwork(startingNetwork);
  		islands = new Island[numIslands];
  		this.numIslands = numIslands;
+ 		this.passingScore = passingScore;
  		
  		for(int i = 0;i<numIslands;i++)
  		{
- 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks);
+ 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks);
  		}
  	}
   	
   	public void trainNetwork()
   	{
   		int syncCount = 0;
- 		while(bestScore > 0)
+ 		while(bestScore > passingScore)
  		{
  			if(syncCount >= syncFrequency)
  				mixIslands();

@@ -9,7 +9,7 @@ public class Test
 {
 	private static int histResolution = 300;
 	private static long[] runtimes = new long[histResolution];
-	private static final int numTests = 1000;
+	private static final int numTests = 1;
 	private static final long maxRunTimeForHistogram = 400;
 	private static long totTime = 0;
 	
@@ -39,7 +39,7 @@ public class Test
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 1, false);
+			GeneticGenerator generator = new GeneticGenerator(trainingData, 100, network, 1, true, 0, 10000, 10);
 			generator.trainNetwork();
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);

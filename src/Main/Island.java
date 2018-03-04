@@ -14,11 +14,13 @@ public class Island
   	double scoreRange = .5;
   	public double worstScore = 0;
  	boolean verbose;
- 	final int maxNetworks = 10, minNetworks = 3;
+ 	final int maxNetworks, minNetworks;
  	public ThreadWrapper wrapper;
 	
-	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks)
+	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks,int maxNetworks, int minNetworks)
 	{
+		this.maxNetworks = maxNetworks;
+		this.minNetworks = minNetworks;
 		this.verbose = verbose;
 		this.data = data;
 		this.islandNo = islandNo;
@@ -36,7 +38,7 @@ public class Island
 	public double trainNetwork()
  	{
   		//Adjust minimum fitness for survival
- 		double sizeModifier = networkList.length/(maxNetworks*1.0);
+ 		double sizeModifier = networkList.length/(maxNetworks/10.0);
   		scoreRange = (worstScore-bestScore)/2/(sizeModifier);
   		//Remove unfit candidates
   		ArrayList<NeuralNet> networks = removeFailures();
@@ -110,6 +112,7 @@ public class Island
  				remCount++;
  			}
  		}
+  		Runtime.getRuntime().gc();
  		if(verbose)
  			System.out.println(remCount+" networks removed");
   		return passingNetworks;

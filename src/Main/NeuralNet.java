@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class NeuralNet 
 {
 	ArrayList<Layer> layerList = new ArrayList<Layer>();
-	double outputThreshold = .9;
+	double outputThreshold = .85;
 	double score = -1;
 	
 	public NeuralNet()
