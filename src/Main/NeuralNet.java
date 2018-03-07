@@ -45,20 +45,37 @@ public class NeuralNet
 		{
 			Scanner scanner = new Scanner(file);
 			layerList = new ArrayList<Layer>();
+			int layerNo = 0;
 			while(scanner.hasNextLine())
 			{
 				String s = scanner.nextLine();
 				Layer l = new Layer();
 				layerList.add(l);
 				
-				String[] separateConnectionsAndBias = s.split(";");
-				
+				String[] nodes = s.split(",");
+				for(int n = 0;n<nodes.length;n++)
+				{
+					parseNode(nodes[n], layerNo);
+				}
+				layerNo++;
 			}
 			scanner.close();
 		} catch (FileNotFoundException e) 
 		{
 				e.printStackTrace();
 		}
+	}
+	
+	private void parseNode(String s, int layerNo)
+	{
+		String[] info = s.split(";");
+		Node n = new Node(Double.parseDouble(info[0]), 0);
+		for(int i = 1;i<info.length;i++)
+		{
+			String[] connInfo = info[i].split(":");
+			new Connection(layerList.get(layerNo-1).nodeList.get(Integer.parseInt(connInfo[1])), n, Double.parseDouble(connInfo[0]));
+		}
+		layerList.get(layerNo).nodeList.add(n);
 	}
 	
 	public NeuralNet breedWithNetwork(NeuralNet network2)
@@ -112,7 +129,7 @@ public class NeuralNet
 		return network;
 	}
 	
-	public void saveNetwork(String filePath)//TODO
+	public void saveNetwork(String filePath)
 	{
 		File file = new File(filePath);
 		try 
