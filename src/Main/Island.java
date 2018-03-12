@@ -9,7 +9,7 @@ public class Island
 	int islandNo;
 	NeuralNet bestNetwork;
   	double bestScore;
- 	final double weightRandomness = 10;
+ 	final double weightRandomness = 1;
  	final int repetitionToModify = 30;
   	double scoreRange = .5;
   	public double worstScore = 0;
@@ -26,7 +26,7 @@ public class Island
 		this.islandNo = islandNo;
 		
 		bestNetwork = startingNetwork;
- 		bestScore = data.testNetwork(startingNetwork);
+ 		bestScore = data.testNetwork(startingNetwork, false);
  		networkList = new NeuralNet[numNetworks];
  		for(int i = 0;i<networkList.length;i++)
  		{
@@ -56,7 +56,7 @@ public class Island
 	{
 		for(int i = 0;i<networkList.length;i++)
 		{
-			double score = data.testNetwork(networkList[i]);
+			double score = data.testNetwork(networkList[i], false);
 			networkList[i].score = score;
 			
 			if(networkList[i] == null)

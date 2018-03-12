@@ -14,7 +14,7 @@ public class Test
 	private static long totTime = 0;
 	
 	public static void main(String[] args)
-	{/**
+	{
 		NeuralNet network = new NeuralNet(new int[]{2,2,1});
 		
 		double[][] inputData = new double[4][2];
@@ -59,16 +59,9 @@ public class Test
 		{
 			System.out.println(runtimes[i]);
 		}
-		**/
-		NeuralNet network = new NeuralNet("src/SavedNetworks/XOR.dat");
-		double[][] inputData = new double[4][2];
-		inputData[0] = new double[] {0,0};
-		inputData[1] = new double[] {0,1};
-		inputData[2] = new double[] {1,0};
-		inputData[3] = new double[] {1,1};
 		
-		NetworkDisplay.displayNetwork(network, inputData[3]);
 		/**
+		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[0]);
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[1]);
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[2]);
 		NetworkDisplay.displayNetwork(generator.bestNetwork.getCopy(), inputData[3]);

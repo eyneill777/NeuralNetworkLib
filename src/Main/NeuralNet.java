@@ -12,6 +12,7 @@ public class NeuralNet
 	ArrayList<Layer> layerList = new ArrayList<Layer>();
 	double outputThreshold = .85;
 	double score = -1;
+	double percentCorrect = 0;
 	
 	public NeuralNet()
 	{
@@ -126,6 +127,9 @@ public class NeuralNet
 				}
 			}
 		}
+		network.outputThreshold = this.outputThreshold;
+		network.percentCorrect = this.percentCorrect;
+		network.score = this.score;
 		return network;
 	}
 	

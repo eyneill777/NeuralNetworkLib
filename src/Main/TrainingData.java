@@ -50,14 +50,18 @@ public class TrainingData
 		}
 	}
 
-	public double testNetwork(NeuralNet network)
+	public double testNetwork(NeuralNet network, boolean verbose)
 	{
 		double error = 0;
+		double percentCorrect = 0;
+		int totalCases = 0;
+		int correctCases = 0;
 		
 		if(inputData != null)
 		{
 			for(int dataSet = 0;dataSet<inputData.length;dataSet++)
 			{
+				double individualError = 0;
 				double[] input = inputData[dataSet];
 				double[] eOutput = expectedOutputData[dataSet];
 				for(int i = 0;i<input.length;i++)
@@ -67,9 +71,15 @@ public class TrainingData
 				network.propigateNetwork();
 				for(int i = 0;i<eOutput.length;i++)
 				{
-					error+=Math.abs(eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					double d = Math.abs(eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					individualError+=d;
+					error+=d;
 				}
+				if(individualError == 0)
+					correctCases++;
+				totalCases++;
 			}
+			percentCorrect = correctCases*1.0/totalCases;
 		}
 		else
 		{
@@ -102,9 +112,33 @@ public class TrainingData
 								loadTrainingDataImage(pixels, network);
 								network.propigateNetwork();
 								double[] eOutput = expectedOutputData[f];
+								double[] output = new double[eOutput.length];
+								double individualError = 0;
 								for(int l = 0;l<eOutput.length;l++)
 								{
-									error+=Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
+									double d = Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
+									individualError+=d;
+									error+= d;
+									output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
+								}
+								totalCases++;
+								if(individualError == 0)
+								{
+									correctCases++;
+								}
+								if(verbose && individualError < 1)
+								{
+									System.out.println(inputFile.getName()+" : "+individualError);
+									for(int b = 0;b<output.length;b++)
+									{
+										System.out.print(output[b]+" ");
+									}
+									System.out.print(" : ");
+									for(int b = 0;b<output.length;b++)
+									{
+										System.out.print(eOutput[b]+" ");
+									}
+									System.out.println();
 								}
 								yIndex = 0;
 							}
@@ -116,9 +150,17 @@ public class TrainingData
 					e.printStackTrace();
 				}
 			}
+			percentCorrect = correctCases*1.0/totalCases;
+			network.percentCorrect = percentCorrect;
+			if(verbose)
+			{
+				System.out.println("Correct Cases: "+correctCases);
+				System.out.println("Total Cases: "+totalCases);	
+				System.out.println("Percent correct: "+percentCorrect);
+			}
 		}
 		
-		return error;
+		return error+(1000-percentCorrect*1000);
 	}
 	
 	public TrainingData getCopy()
