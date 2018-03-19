@@ -24,18 +24,21 @@ public class Node
 	
 	public void mixWithNode(Node node2)
 	{
-		for(int i = 0;i<connectionList.size();i++)
+		if(Math.random()<.5)
 		{
-			if(i<node2.connectionList.size())
+			for(int i = 0;i<connectionList.size();i++)
 			{
-				connectionList.get(i).weight = (connectionList.get(i).weight+node2.connectionList.get(i).weight)/2;
+				if(i<node2.connectionList.size())
+				{
+					connectionList.get(i).weight = node2.connectionList.get(i).weight;
+				}
+				else
+				{
+					System.out.println("TODO Error: ConnectionList size differs between networks.  See Node.mixWithNode()");
+				}
 			}
-			else
-			{
-				System.out.println("TODO Error: ConnectionList size differs between networks.  See Node.mixWithNode()");
-			}
+			bias = node2.bias;
 		}
-		bias = bias+node2.bias/2.0;
 	}
 	
 	public void connectToLayer(Layer l)

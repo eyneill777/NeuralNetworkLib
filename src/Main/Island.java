@@ -9,9 +9,8 @@ public class Island
 	int islandNo;
 	NeuralNet bestNetwork;
   	double bestScore;
- 	final double weightRandomness = .3;
+ 	final double weightRandomness = 1;
  	final int repetitionToModify = 30;
-  	double scoreRange = .5;
   	public double worstScore = 0;
  	boolean verbose;
  	final int maxNetworks, minNetworks;
@@ -39,7 +38,6 @@ public class Island
  	{
   		//Adjust minimum fitness for survival
  		double sizeModifier = networkList.length/(maxNetworks/10.0);
-  		scoreRange = (worstScore-bestScore)/2/(sizeModifier);
   		//Remove unfit candidates
   		ArrayList<NeuralNet> networks = removeFailures();
   		//breed fit candidates
@@ -97,6 +95,15 @@ public class Island
  	
  	private ArrayList<NeuralNet> removeFailures()
  	{
+ 		//Make the scoreRange be the best through average scores
+ 		double scoreRange = 0;
+ 		for(int i = 0;i<networkList.length;i++)
+ 		{
+ 			scoreRange+=networkList[i].score;
+ 		}
+ 		scoreRange/=networkList.length;
+ 		scoreRange-=bestScore;
+ 		
  		if(verbose)
  			System.out.println(bestScore+" "+scoreRange+" "+worstScore);
  		int remCount = 0;

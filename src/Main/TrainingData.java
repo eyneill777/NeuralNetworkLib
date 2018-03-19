@@ -176,6 +176,14 @@ public class TrainingData
 						e.printStackTrace();
 					}
 				}
+				percentCorrect = correctCases*1.0/totalCases;
+				network.percentCorrect = percentCorrect;
+				if(verbose)
+				{
+					System.out.println("Correct Cases: "+correctCases);
+					System.out.println("Total Cases: "+totalCases);	
+					System.out.println("Percent correct: "+percentCorrect);
+				}
 			}
 		}
 		
