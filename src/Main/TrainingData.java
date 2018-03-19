@@ -3,12 +3,19 @@ package Main;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TrainingData 
 {
 	double[][] inputData, expectedOutputData;
 	File[] inputFiles;
+	boolean isPSD;
+	final int percentCorrectWeight = 500;
+	double error = 0;
+	double percentCorrect = 0;
+	int totalCases = 0;
+	int correctCases = 0;
 	
 	public TrainingData(double[][] inputData, double[][] expectedOutputData)
 	{
@@ -33,8 +40,9 @@ public class TrainingData
 		}
 	}
 	
-	public TrainingData(File[] inputData)
+	public TrainingData(File[] inputData, boolean isPSD)
 	{
+		this.isPSD = isPSD;
 		this.inputFiles = inputData;
 		expectedOutputData = new double[inputData.length][inputData.length];
 		for(int i = 0;i<inputData.length;i++)
@@ -52,10 +60,10 @@ public class TrainingData
 
 	public double testNetwork(NeuralNet network, boolean verbose)
 	{
-		double error = 0;
-		double percentCorrect = 0;
-		int totalCases = 0;
-		int correctCases = 0;
+		error = 0;
+		percentCorrect = 0;
+		totalCases = 0;
+		correctCases = 0;
 		
 		if(inputData != null)
 		{
@@ -83,84 +91,128 @@ public class TrainingData
 		}
 		else
 		{
-			for(int f = 0;f<inputFiles.length;f++)
+			if(!isPSD)
 			{
-				File inputFile = inputFiles[f];
-				try {
-					int maxDataValue = 0;
-					Scanner in = new Scanner(new FileInputStream(inputFile));
-					in = new Scanner(new FileInputStream(inputFile)); //resets the scanner to top of file
-					int xIndex = 0, yIndex = 0;
-					int[][] pixels = new int[28][28];
-					while(in.hasNextLine())
-					{
-						String s = in.nextLine();
-						for(int i = 0;i<s.length();i++)
+				for(int f = 0;f<inputFiles.length;f++)
+				{
+					File inputFile = inputFiles[f];
+					try {
+						int maxDataValue = 0;
+						Scanner in = new Scanner(new FileInputStream(inputFile));
+						in = new Scanner(new FileInputStream(inputFile)); //resets the scanner to top of file
+						int xIndex = 0, yIndex = 0;
+						int[][] pixels = new int[28][28];
+						while(in.hasNextLine())
 						{
-							if(xIndex < 27)
-								xIndex++;
-							else
+							String s = in.nextLine();
+							for(int i = 0;i<s.length();i++)
 							{
-								xIndex = 0;
-								yIndex++;
-							}
-							if(maxDataValue<(int)s.charAt(i))
-								maxDataValue = (int)s.charAt(i);
-							pixels[xIndex][yIndex] = (int)s.charAt(i);
-							if(yIndex >= 27)
-							{
-								loadTrainingDataImage(pixels, network);
-								network.propigateNetwork();
-								double[] eOutput = expectedOutputData[f];
-								double[] output = new double[eOutput.length];
-								double individualError = 0;
-								for(int l = 0;l<eOutput.length;l++)
+								if(xIndex < 27)
+									xIndex++;
+								else
 								{
-									double d = Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
-									individualError+=d;
-									error+= d;
-									output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
+									xIndex = 0;
+									yIndex++;
 								}
-								totalCases++;
-								if(individualError == 0)
+								if(maxDataValue<(int)s.charAt(i))
+									maxDataValue = (int)s.charAt(i);
+								pixels[xIndex][yIndex] = (int)s.charAt(i);
+								if(yIndex >= 27)
 								{
-									correctCases++;
+									loadTrainingDataImage(pixels, network);
+									network.propigateNetwork();
+									calculateError(f,network,verbose,inputFile);
+									yIndex = 0;
 								}
-								if(verbose && individualError < 1)
-								{
-									System.out.println(inputFile.getName()+" : "+individualError);
-									for(int b = 0;b<output.length;b++)
-									{
-										System.out.print(output[b]+" ");
-									}
-									System.out.print(" : ");
-									for(int b = 0;b<output.length;b++)
-									{
-										System.out.print(eOutput[b]+" ");
-									}
-									System.out.println();
-								}
-								yIndex = 0;
 							}
 						}
+						in.close();
+					} catch (FileNotFoundException e) {
+						System.out.println("File Read Failed on File " + inputFile.getName());
+						e.printStackTrace();
 					}
-					in.close();
-				} catch (FileNotFoundException e) {
-					System.out.println("File Read Failed on File " + inputFile.getName());
-					e.printStackTrace();
+				}
+				percentCorrect = correctCases*1.0/totalCases;
+				network.percentCorrect = percentCorrect;
+				if(verbose)
+				{
+					System.out.println("Correct Cases: "+correctCases);
+					System.out.println("Total Cases: "+totalCases);	
+					System.out.println("Percent correct: "+percentCorrect);
 				}
 			}
-			percentCorrect = correctCases*1.0/totalCases;
-			network.percentCorrect = percentCorrect;
-			if(verbose)
+			else
 			{
-				System.out.println("Correct Cases: "+correctCases);
-				System.out.println("Total Cases: "+totalCases);	
-				System.out.println("Percent correct: "+percentCorrect);
+				for(int f = 0;f<inputFiles.length;f++)
+				{
+					try 
+					{
+						Scanner scanner = new Scanner(inputFiles[f]);
+						ArrayList<Double> inputData = new ArrayList<Double>();
+						while(scanner.hasNextLine())
+						{
+							String s = scanner.nextLine();
+							if(!s.equals(""))
+							{
+								String[] ds = s.split("\t");
+								for(int i = 0;i<ds.length;i++)
+								{
+									inputData.add(Double.parseDouble(ds[i]));
+								}
+							}
+							else
+							{
+								for(int i = 0;i<inputData.size();i++)
+								{
+									network.layerList.get(0).nodeList.get(i).setValue(inputData.get(i));
+								}
+								network.propigateNetwork();
+								calculateError(f, network, verbose, inputFiles[f]);
+								inputData.clear();
+							}
+						}
+					} catch (FileNotFoundException e) 
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 		
-		return error+(1000-percentCorrect*1000);
+		return error+(percentCorrectWeight-percentCorrect*percentCorrectWeight);
+	}
+	
+	private void calculateError(int file, NeuralNet network, boolean verbose, File inputFile)
+	{
+		double[] eOutput = expectedOutputData[file];
+		double[] output = new double[eOutput.length];
+		double individualError = 0;
+		for(int l = 0;l<eOutput.length;l++)
+		{
+			double d = Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
+			individualError+=d;
+			output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
+		}
+		error+=individualError;
+		totalCases++;
+		if(individualError == 0)
+		{
+			correctCases++;
+		}
+		if(verbose && individualError < 1)
+		{
+			System.out.println(inputFile.getName()+" : "+individualError);
+			for(int b = 0;b<output.length;b++)
+			{
+				System.out.print(output[b]+" ");
+			}
+			System.out.print(" : ");
+			for(int b = 0;b<output.length;b++)
+			{
+				System.out.print(eOutput[b]+" ");
+			}
+			System.out.println();
+		}
 	}
 	
 	public TrainingData getCopy()
@@ -169,7 +221,7 @@ public class TrainingData
 		if(inputData != null)
 			data = new TrainingData(inputData, expectedOutputData);
 		else
-			data = new TrainingData(inputFiles);
+			data = new TrainingData(inputFiles, isPSD);
 		return data;
 	}
 	

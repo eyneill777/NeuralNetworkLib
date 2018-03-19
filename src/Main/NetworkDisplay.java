@@ -91,7 +91,7 @@ class DisplayPanel extends JPanel
 						int x2 = 100+(x)*layerSeparation+layerSeparation/2;
 						int prevLayerNodeSeparation = (panelDim.height-100)/network.layerList.get(x-1).nodeList.size();
 						int nodeSeparation = (panelDim.height-100)/network.layerList.get(x).nodeList.size();
-						int y1 = 50+i*prevLayerNodeSeparation+prevLayerNodeSeparation/2;
+						int y1 = 50+n.connectionList.get(i).node1Index*prevLayerNodeSeparation+prevLayerNodeSeparation/2;
 						int y2 = 50+y*nodeSeparation+nodeSeparation/2;
 						g.drawLine(x1, y1, x2, y2);
 					}

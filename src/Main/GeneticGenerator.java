@@ -18,7 +18,9 @@
   		this.maxNetworks = maxNetworks;
   		this.minNetworks = minNetworks;
   		this.verbose = verbose;
+  		bestNetwork = startingNetwork;
  		bestScore = data.testNetwork(startingNetwork, false);
+ 		System.out.println(bestScore);
  		islands = new Island[numIslands];
  		this.numIslands = numIslands;
  		this.passingScore = passingScore;
@@ -61,6 +63,7 @@
  					bestNetwork.saveNetwork("src/Data/autosave");
  				}
  			}
+ 			bestNetwork.saveNetwork("src/Data/autosave");
  			
  			syncCount++;
  			System.out.println("Total best score "+ bestScore + " Percent Correct "+bestNetwork.percentCorrect);

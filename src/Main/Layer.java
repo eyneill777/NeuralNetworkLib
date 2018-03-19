@@ -15,7 +15,7 @@ public class Layer
 	{
 		for(int i=0;i<numNodes;i++)
 		{
-			nodeList.add(new Node());
+			nodeList.add(new Node(this));
 		}
 	}
 	

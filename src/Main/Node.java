@@ -6,17 +6,20 @@ public class Node
 {
 	double bias, value;
 	ArrayList<Connection> connectionList = new ArrayList<Connection>();
+	Layer layer;
 	
-	public Node()
+	public Node(Layer layer)
 	{
 		bias = 0;
 		value = 0;
+		this.layer = layer;
 	}
 	
-	public Node(double bias, double value)
+	public Node(double bias, double value, Layer layer)
 	{
 		this.bias = bias;
 		this.value = value;
+		this.layer = layer;
 	}
 	
 	public void mixWithNode(Node node2)
@@ -39,7 +42,7 @@ public class Node
 	{
 		for(int i = 0;i<l.nodeList.size();i++)
 		{
-			new Connection(l.nodeList.get(i), this, 0);
+			new Connection(l.nodeList.get(i), this, 0, i, layer.nodeList.indexOf(this));
 		}
 	}
 	

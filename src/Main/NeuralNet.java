@@ -70,11 +70,11 @@ public class NeuralNet
 	private void parseNode(String s, int layerNo)
 	{
 		String[] info = s.split(";");
-		Node n = new Node(Double.parseDouble(info[0]), 0);
+		Node n = new Node(Double.parseDouble(info[0]), 0, layerList.get(layerNo));
 		for(int i = 1;i<info.length;i++)
 		{
 			String[] connInfo = info[i].split(":");
-			new Connection(layerList.get(layerNo-1).nodeList.get(Integer.parseInt(connInfo[1])), n, Double.parseDouble(connInfo[0]));
+			new Connection(layerList.get(layerNo-1).nodeList.get(Integer.parseInt(connInfo[1])), n, Double.parseDouble(connInfo[0]), Integer.parseInt(connInfo[1]), layerList.get(layerNo-1).nodeList.indexOf(n));
 		}
 		layerList.get(layerNo).nodeList.add(n);
 	}
@@ -120,10 +120,16 @@ public class NeuralNet
 			network.layerList.add(new Layer());
 			for(int n = 0;n<layerList.get(l).nodeList.size();n++)
 			{
-				network.layerList.get(l).nodeList.add(new Node(layerList.get(l).nodeList.get(n).bias, layerList.get(l).nodeList.get(n).value));
+				network.layerList.get(l).nodeList.add(new Node(layerList.get(l).nodeList.get(n).bias, layerList.get(l).nodeList.get(n).value, network.layerList.get(l)));
 				for(int c = 0;c<layerList.get(l).nodeList.get(n).connectionList.size();c++)
 				{
-					network.layerList.get(l).nodeList.get(n).connectionList.add(new Connection(network.layerList.get(l-1).nodeList.get(c), layerList.get(l).nodeList.get(n), layerList.get(l).nodeList.get(n).connectionList.get(c).weight, true));
+					network.layerList.get(l).
+					nodeList.get(n).
+					connectionList.add
+					(new Connection(
+							network.layerList.get(l-1).nodeList.get(this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index),
+							layerList.get(l).nodeList.get(n)
+							, layerList.get(l).nodeList.get(n).connectionList.get(c).weight, true, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node2Index));
 				}
 			}
 		}
@@ -147,7 +153,7 @@ public class NeuralNet
 					writer.write(n.bias+"");
 					for(Connection con:n.connectionList)
 					{
-						writer.write(";"+con.getSaveString(layerList.get(a-1)));
+						writer.write(";"+con.getSaveString());
 					}
 					writer.write(",");
 				}

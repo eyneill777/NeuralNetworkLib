@@ -9,7 +9,7 @@ public class Island
 	int islandNo;
 	NeuralNet bestNetwork;
   	double bestScore;
- 	final double weightRandomness = 1;
+ 	final double weightRandomness = .3;
  	final int repetitionToModify = 30;
   	double scoreRange = .5;
   	public double worstScore = 0;
