@@ -11,7 +11,7 @@ public class TrainingData
 	double[][] inputData, expectedOutputData;
 	File[] inputFiles;
 	boolean isPSD;
-	final int percentCorrectWeight = 500;
+	final int percentCorrectWeight = 0;
 	double error = 0;
 	double percentCorrect = 0;
 	int totalCases = 0;
@@ -88,6 +88,7 @@ public class TrainingData
 				totalCases++;
 			}
 			percentCorrect = correctCases*1.0/totalCases;
+			network.percentCorrect = percentCorrect;
 		}
 		else
 		{
