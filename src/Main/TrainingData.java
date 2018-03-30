@@ -11,20 +11,22 @@ public class TrainingData
 	double[][] inputData, expectedOutputData;
 	File[] inputFiles;
 	boolean isPSD;
-	final int percentCorrectWeight = 500;
+	int percentCorrectWeight;
 	double error = 0;
 	double percentCorrect = 0;
 	int totalCases = 0;
 	int correctCases = 0;
 	
-	public TrainingData(double[][] inputData, double[][] expectedOutputData)
+	public TrainingData(double[][] inputData, double[][] expectedOutputData, int percentCorrectWeight)
 	{
+		this.percentCorrectWeight = percentCorrectWeight;
 		this.inputData = inputData;
 		this.expectedOutputData = expectedOutputData;
 	}
 	
-	public TrainingData(Double[][] inputData, Double[][] expectedOutputData) 
+	public TrainingData(Double[][] inputData, Double[][] expectedOutputData, int percentCorrectWeight) 
 	{
+		this.percentCorrectWeight = percentCorrectWeight;
 		this.inputData = new double[inputData.length][inputData[0].length];
 		this.expectedOutputData = new double[expectedOutputData.length][expectedOutputData[0].length];
 		for(int i = 0;i<inputData.length;i++)
@@ -40,8 +42,9 @@ public class TrainingData
 		}
 	}
 	
-	public TrainingData(File[] inputData, boolean isPSD)
+	public TrainingData(File[] inputData, boolean isPSD, int percentCorrectWeight)
 	{
+		this.percentCorrectWeight = percentCorrectWeight;
 		this.isPSD = isPSD;
 		this.inputFiles = inputData;
 		expectedOutputData = new double[inputData.length][inputData.length];
@@ -186,7 +189,6 @@ public class TrainingData
 				}
 			}
 		}
-		
 		return error+(percentCorrectWeight-percentCorrect*percentCorrectWeight);
 	}
 	
@@ -227,9 +229,9 @@ public class TrainingData
 	{
 		TrainingData data;
 		if(inputData != null)
-			data = new TrainingData(inputData, expectedOutputData);
+			data = new TrainingData(inputData, expectedOutputData, percentCorrectWeight);
 		else
-			data = new TrainingData(inputFiles, isPSD);
+			data = new TrainingData(inputFiles, isPSD, percentCorrectWeight);
 		return data;
 	}
 	

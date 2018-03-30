@@ -8,7 +8,7 @@
   	int numIslands;
   	NeuralNet bestNetwork;
   	double bestScore;
-  	final int syncFrequency = 1;
+  	final int syncFrequency = 30;
  	boolean verbose = false;
  	int passingScore;
  	int maxNetworks, minNetworks;
@@ -38,7 +38,10 @@
  		{
  			long t = System.currentTimeMillis();
  			if(syncCount >= syncFrequency)
+ 			{
  				mixIslands();
+ 				syncCount = 0;
+ 			}
  			
  			for(int i = 0;i<numIslands;i++)
  	 		{
@@ -78,7 +81,11 @@
   			for(int j = 0;j<islands.length;j++)
   			{
   				if(i != j)
+  				{
   					islands[i].mixWith(islands[j], bestNetwork, bestScore);
+  					//islands[i].weightRandomness = islands[i].baseWeightRandomness;
+  					//islands[i].biasRandomness = islands[i].baseBiasRandomness;
+  				}
   			}
   		}
   	}

@@ -7,6 +7,7 @@ public class Node
 	double bias, value;
 	ArrayList<Connection> connectionList = new ArrayList<Connection>();
 	Layer layer;
+	//double biasMomentum = 0;
 	
 	public Node(Layer layer)
 	{

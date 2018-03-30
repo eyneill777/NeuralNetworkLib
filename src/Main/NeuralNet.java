@@ -7,12 +7,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.w3c.dom.NodeList;
+
 public class NeuralNet 
 {
 	ArrayList<Layer> layerList = new ArrayList<Layer>();
 	double outputThreshold = .85;
 	double score = -1;
 	double percentCorrect = 0;
+	double biasMomentumFriction = 1.1;
+	double weightMomentumFriction = 1.1;
 	
 	public NeuralNet()
 	{
@@ -64,6 +68,22 @@ public class NeuralNet
 		} catch (FileNotFoundException e) 
 		{
 				e.printStackTrace();
+		}
+	}
+	
+	//public void applyMomentum()
+	{
+		for(int i = 0;i<layerList.size();i++)
+		{
+			for(int n = 0;n<layerList.get(i).nodeList.size();n++)
+			{
+				Node node = layerList.get(i).nodeList.get(n);
+				//node.bias+=node.biasMomentum;
+				for(Connection c:node.connectionList)
+				{
+					//c.weight+=c.momentum;
+				}
+			}
 		}
 	}
 	
@@ -121,6 +141,7 @@ public class NeuralNet
 			for(int n = 0;n<layerList.get(l).nodeList.size();n++)
 			{
 				network.layerList.get(l).nodeList.add(new Node(layerList.get(l).nodeList.get(n).bias, layerList.get(l).nodeList.get(n).value, network.layerList.get(l)));
+				//network.layerList.get(l).nodeList.get(network.layerList.get(l).nodeList.size()-1).biasMomentum = layerList.get(l).nodeList.get(n).biasMomentum;
 				for(int c = 0;c<layerList.get(l).nodeList.get(n).connectionList.size();c++)
 				{
 					network.layerList.get(l).
@@ -130,6 +151,7 @@ public class NeuralNet
 							network.layerList.get(l-1).nodeList.get(this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index),
 							layerList.get(l).nodeList.get(n)
 							, layerList.get(l).nodeList.get(n).connectionList.get(c).weight, true, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node2Index));
+					//network.layerList.get(l).nodeList.get(n).connectionList.get(c).momentum = layerList.get(l).nodeList.get(n).connectionList.get(c).momentum;
 				}
 			}
 		}
@@ -137,6 +159,22 @@ public class NeuralNet
 		network.percentCorrect = this.percentCorrect;
 		network.score = this.score;
 		return network;
+	}
+	
+	//Apply 'friction' and slow the speed of the networks momentum
+	public void slowMomentum()
+	{
+		for(Layer l:layerList)
+		{
+			for(Node n:l.nodeList)
+			{
+				//n.biasMomentum = n.biasMomentum/weightMomentumFriction;
+				for(Connection c:n.connectionList)
+				{
+					//c.momentum/=weightMomentumFriction;
+				}
+			}
+		}
 	}
 	
 	public void saveNetwork(String filePath)
@@ -165,5 +203,28 @@ public class NeuralNet
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public double[] getAvgMomentum()
+	{
+		double weightList = 0;
+		double biasList = 0;
+		double weightCount = 0, biasCount = 0;
+		for(Layer l:layerList)
+		{
+			for(Node n:l.nodeList)
+			{
+				biasCount++;
+				//biasList+=Math.abs(n.biasMomentum);
+				for(Connection c:n.connectionList)
+				{
+					weightCount++;
+					//weightList+=Math.abs(c.momentum);
+				}
+			}
+		}
+		weightList/=weightCount;
+		biasList/=biasCount;
+		return new double[]{weightList,biasList};
 	}
 }

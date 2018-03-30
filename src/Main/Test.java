@@ -29,7 +29,7 @@ public class Test
 		expectedOutputData[2] = new double[] {1};
 		expectedOutputData[3] = new double[] {0};
 		
-		TrainingData trainingData = new TrainingData(inputData, expectedOutputData);
+		TrainingData trainingData = new TrainingData(inputData, expectedOutputData, 0);
 		
 		for(int i = 0;i<histResolution;i++)
 		{
@@ -39,7 +39,7 @@ public class Test
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			generator = new GeneticGenerator(trainingData, 100, network, 1, true, 0, 10000, 10);
+			generator = new GeneticGenerator(trainingData, 100, network, 1, false, 0, 10000,10);
 			generator.trainNetwork();
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);

@@ -9,12 +9,17 @@ public class Island
 	int islandNo;
 	NeuralNet bestNetwork;
   	double bestScore;
- 	final double weightRandomness = 1;
+ 	public double weightRandomness = 10, biasRandomness = 10;
+ 	public double baseWeightRandomness = 10, baseBiasRandomness = 10, maxWeightRandomness = 20, maxBiasRandomness = 20;//must be greater than 0
+ 	//private double randomnessResetChance = .1;
+ 	private double biasRandomnessModifier = 1, weightRandomnessModifier = 1;
  	final int repetitionToModify = 30;
   	public double worstScore = 0;
  	boolean verbose;
  	final int maxNetworks, minNetworks;
  	public ThreadWrapper wrapper;
+ 	double mutateChance = .1;
+ 	double miracleChance = .3;
 	
 	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks,int maxNetworks, int minNetworks)
 	{
@@ -30,20 +35,19 @@ public class Island
  		for(int i = 0;i<networkList.length;i++)
  		{
  			networkList[i] = startingNetwork.getCopy();
- 			randomizeNetworkWeightsAndBiases(networkList[i]);
+ 			randomizeNetworkWeights(networkList[i]);
  		}
 	}
 	
 	public double trainNetwork()
  	{
-  		//Adjust minimum fitness for survival
- 		double sizeModifier = networkList.length/(maxNetworks/10.0);
   		//Remove unfit candidates
   		ArrayList<NeuralNet> networks = removeFailures();
   		//breed fit candidates
   		reproduceNetworks(networks);
  		//If there are too many networks kill randomly
  		cullPopulation();
+ 		//printMomentums();
  		worstScore = 0;
   		//Test Networks
   		testNetworks(data);
@@ -52,6 +56,7 @@ public class Island
 	
 	private void testNetworks(TrainingData data)
 	{
+		double lastBest = bestScore;
 		for(int i = 0;i<networkList.length;i++)
 		{
 			double score = data.testNetwork(networkList[i], false);
@@ -70,6 +75,32 @@ public class Island
 				worstScore = score;
 			}
 		}
+		if(lastBest <= bestScore)
+		{
+			weightRandomness+=weightRandomnessModifier;
+			biasRandomness+=biasRandomnessModifier;
+		}
+		else if(weightRandomness > baseWeightRandomness)
+		{
+			weightRandomness = baseWeightRandomness;
+			biasRandomness = baseBiasRandomness;
+		}
+		if(weightRandomness>maxWeightRandomness)
+		{
+			baseWeightRandomness/=2;
+			weightRandomnessModifier/=2;
+			maxWeightRandomness/=2;
+			weightRandomness = baseWeightRandomness;
+		}
+		if(biasRandomness>maxBiasRandomness)
+		{
+			baseBiasRandomness/=2;
+			biasRandomnessModifier/=2;
+			maxWeightRandomness/=2;
+			biasRandomness = baseBiasRandomness;
+			
+		}
+		System.out.println("randomness "+weightRandomness);
 		
 		if(verbose)
  			System.out.println("Island "+ islandNo+" : "+bestScore);
@@ -80,8 +111,9 @@ public class Island
  		int len = networks.size();
  		for(int i = 1;i<len;i++)
  		{
- 			NeuralNet n = networks.get(i).breedWithNetwork(networks.get(i-1));
- 			randomizeNetworkWeightsAndBiases(n);
+ 			NeuralNet n = networks.get(i).breedWithNetwork(networks.get((int)(Math.random()*len)));
+ 			//n.applyMomentum();
+ 			randomizeNetworkWeights(n);
  			networks.add(n);
  		}
  		networkList = new NeuralNet[networks.size()];
@@ -110,7 +142,7 @@ public class Island
   		ArrayList<NeuralNet> passingNetworks = new ArrayList<NeuralNet>();
   		for(int i = 0;i<networkList.length;i++)
   		{
- 			if(networkList[i].score<bestScore+scoreRange || remCount >= networkList.length-minNetworks)
+ 			if(networkList[i].score<bestScore+scoreRange || remCount >= networkList.length-minNetworks || Math.random()<miracleChance)
   			{
   				passingNetworks.add(networkList[i]);
   			}
@@ -145,24 +177,45 @@ public class Island
  		}
  	}
 	
-	private void randomizeNetworkWeightsAndBiases(NeuralNet network)
+	private void randomizeNetworkWeights(NeuralNet network)
  	{
  		for(int l = 0;l<network.layerList.size();l++)
  		{
  			for(int n = 0;n<network.layerList.get(l).nodeList.size();n++)
  			{
- 				network.layerList.get(l).nodeList.get(n).bias+=Math.random()-.5;
- 				for(int c = 0;c<network.layerList.get(l).nodeList.get(n).connectionList.size();c++)
+ 				if(Math.random()<mutateChance)
  				{
- 					network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight+=(Math.random()-.5)*weightRandomness;
- 					if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight > 15)
- 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = 15;
- 					else if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight < -15)
- 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = -15;
+	 				network.layerList.get(l).nodeList.get(n).bias+=Math.random()*biasRandomness-biasRandomness/2;
+	 				if(network.layerList.get(l).nodeList.get(n).bias > 15)
+	 					network.layerList.get(l).nodeList.get(n).bias = 15;
+	 				else if(network.layerList.get(l).nodeList.get(n).bias < -15)
+	 					network.layerList.get(l).nodeList.get(n).bias = -15;
+	 					
+	 				for(int c = 0;c<network.layerList.get(l).nodeList.get(n).connectionList.size();c++)
+	 				{
+	 					network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight+=(Math.random()-.5)*weightRandomness;
+	 					if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight > 15)
+	 					{
+	 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = 15;
+	 					}
+	 					else if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight < -15)
+	 					{
+	 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = -15;
+	 					}
+	 				}
  				}
  			}
  		}
  	}
+	
+	public void printMomentums()
+	{
+		System.out.println("avg momentum");
+		for(NeuralNet n:networkList)
+		{
+			System.out.println(n.getAvgMomentum()[1]+"\t"+n.getAvgMomentum()[0]);
+		}
+	}
 	
 	public void mixWith(Island island, NeuralNet topNetwork, double topScore)
 	{

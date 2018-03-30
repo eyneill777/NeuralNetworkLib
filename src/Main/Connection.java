@@ -5,6 +5,7 @@ public class Connection
 	Node node1, node2;
 	double weight;
 	int node1Index, node2Index;
+	//double momentum = 0;
 	
 	public Connection(Node n1, Node n2, double weight, int node1Index, int node2Index)
 	{
