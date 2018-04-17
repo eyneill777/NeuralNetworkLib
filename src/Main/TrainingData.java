@@ -101,6 +101,7 @@ public class TrainingData
 				totalCases++;
 			}
 			percentCorrect = correctCases*1.0/totalCases;
+			network.percentCorrect = percentCorrect;
 		}
 		else
 		{
