@@ -1,4 +1,4 @@
- package Main;
+package Main;
  
  import java.util.ArrayList;
  
@@ -8,10 +8,12 @@
   	int numIslands;
   	NeuralNet bestNetwork;
   	double bestScore;
-  	final int syncFrequency = 1;
+  	final int syncFrequency = 5;
  	boolean verbose = false;
  	int passingScore;
  	int maxNetworks, minNetworks;
+ 	boolean displaying = false;
+ 	NetworkDisplay display;
   	
   	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks)
   	{
@@ -31,6 +33,29 @@
  		}
  	}
   	
+  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks, boolean displaying)
+  	{
+  		this.maxNetworks = maxNetworks;
+  		this.minNetworks = minNetworks;
+  		this.verbose = verbose;
+  		bestNetwork = startingNetwork;
+ 		bestScore = data.testNetwork(startingNetwork, false);
+ 		System.out.println(bestScore);
+ 		islands = new Island[numIslands];
+ 		this.numIslands = numIslands;
+ 		this.passingScore = passingScore;
+ 		
+ 		for(int i = 0;i<numIslands;i++)
+ 		{
+ 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks);
+ 		}
+ 		this.displaying = displaying;
+ 		if(displaying)
+ 		{
+ 			display = new NetworkDisplay(bestNetwork);
+ 		}
+ 	}
+  	
   	public void trainNetwork()
   	{
   		int syncCount = 0;
@@ -38,7 +63,10 @@
  		{
  			long t = System.currentTimeMillis();
  			if(syncCount >= syncFrequency)
+ 			{
  				mixIslands();
+ 				syncCount = 0;
+ 			}
  			
  			for(int i = 0;i<numIslands;i++)
  	 		{
@@ -68,6 +96,8 @@
  			syncCount++;
  			System.out.println("Total best score "+ bestScore + " Percent Correct "+bestNetwork.percentCorrect);
  			System.out.println();
+ 			if(displaying)
+ 				display.repaint(bestNetwork);
  		}
   	}
   	
@@ -78,7 +108,11 @@
   			for(int j = 0;j<islands.length;j++)
   			{
   				if(i != j)
+  				{
   					islands[i].mixWith(islands[j], bestNetwork, bestScore);
+  					//islands[i].weightRandomness = islands[i].baseWeightRandomness;
+  					//islands[i].biasRandomness = islands[i].baseBiasRandomness;
+  				}
   			}
   		}
   	}

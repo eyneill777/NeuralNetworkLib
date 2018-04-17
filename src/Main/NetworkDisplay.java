@@ -12,6 +12,24 @@ import javax.swing.JPanel;
 
 public class NetworkDisplay 
 {
+	DisplayPanel panel;
+	
+	public NetworkDisplay(NeuralNet network)
+	{
+		JFrame frame = new JFrame();
+		panel = new DisplayPanel(network);
+		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(panel);
+		frame.setVisible(true);
+	}
+	
+	public void repaint(NeuralNet network)
+	{
+		panel.network = network;
+		panel.repaint();
+	}
+	
 	public static void displayNetwork(NeuralNet network)
 	{
 		JFrame frame = new JFrame();
@@ -87,6 +105,8 @@ class DisplayPanel extends JPanel
 							g.setColor(new Color(0, (int)(30+w/maxWeight*225), 0));
 						else
 							g.setColor(new Color((int)(30+Math.abs(w)/maxWeight*225), 0, 0));
+						if(w==0)
+							g.setColor(new Color((int)(30+Math.abs(w)/maxWeight*225), 0, 0, 0));
 						int x1 = 100+(x-1)*layerSeparation+layerSeparation/2;
 						int x2 = 100+(x)*layerSeparation+layerSeparation/2;
 						int prevLayerNodeSeparation = (panelDim.height-100)/network.layerList.get(x-1).nodeList.size();

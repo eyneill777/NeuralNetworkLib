@@ -7,6 +7,8 @@ public class Node
 	double bias, value;
 	ArrayList<Connection> connectionList = new ArrayList<Connection>();
 	Layer layer;
+	boolean unbiased = false;
+	//double biasMomentum = 0;
 	
 	public Node(Layer layer)
 	{
@@ -56,16 +58,19 @@ public class Node
 		{
 			sum+=connectionList.get(i).node1.value*connectionList.get(i).weight;
 		}
-		sum+=bias;
+		if(!unbiased)
+			sum+=bias;
 		setValue(activationFunction(sum));
 	}
 	
 	private double activationFunction(double x)
 	{
-		return 1.0/(1+Math.pow(Math.E, (-1*x)));
+		return (1.0/(1+Math.pow(Math.E, (-1*x)))-.5)*2;
 	}
 
 	public double getBias() {
+		if(unbiased)
+			return 0;
 		return bias;
 	}
 
