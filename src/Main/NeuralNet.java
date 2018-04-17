@@ -70,7 +70,7 @@ public class NeuralNet
 				e.printStackTrace();
 		}
 	}
-	
+	/**
 	//public void applyMomentum()
 	{
 		for(int i = 0;i<layerList.size();i++)
@@ -86,7 +86,7 @@ public class NeuralNet
 			}
 		}
 	}
-	
+	**/
 	private void parseNode(String s, int layerNo)
 	{
 		String[] info = s.split(";");
@@ -141,7 +141,7 @@ public class NeuralNet
 			for(int n = 0;n<layerList.get(l).nodeList.size();n++)
 			{
 				network.layerList.get(l).nodeList.add(new Node(layerList.get(l).nodeList.get(n).bias, layerList.get(l).nodeList.get(n).value, network.layerList.get(l)));
-				//network.layerList.get(l).nodeList.get(network.layerList.get(l).nodeList.size()-1).biasMomentum = layerList.get(l).nodeList.get(n).biasMomentum;
+				network.layerList.get(l).nodeList.get(network.layerList.get(l).nodeList.size()-1).unbiased = layerList.get(l).nodeList.get(n).unbiased;
 				for(int c = 0;c<layerList.get(l).nodeList.get(n).connectionList.size();c++)
 				{
 					network.layerList.get(l).
@@ -188,7 +188,7 @@ public class NeuralNet
 			{
 				for(Node n:l.nodeList)
 				{
-					writer.write(n.bias+"");
+					writer.write(n.getBias()+"");
 					for(Connection con:n.connectionList)
 					{
 						writer.write(";"+con.getSaveString());
