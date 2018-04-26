@@ -109,10 +109,10 @@ class DisplayPanel extends JPanel
 							g.setColor(new Color((int)(30+Math.abs(w)/maxWeight*225), 0, 0, 0));
 						int x1 = 100+(x-1)*layerSeparation+layerSeparation/2;
 						int x2 = 100+(x)*layerSeparation+layerSeparation/2;
-						int prevLayerNodeSeparation = (panelDim.height-100)/network.layerList.get(x-1).nodeList.size();
-						int nodeSeparation = (panelDim.height-100)/network.layerList.get(x).nodeList.size();
-						int y1 = 50+n.connectionList.get(i).node1Index*prevLayerNodeSeparation+prevLayerNodeSeparation/2;
-						int y2 = 50+y*nodeSeparation+nodeSeparation/2;
+						double prevLayerNodeSeparation = (panelDim.height-100)/(network.layerList.get(x-1).nodeList.size()*1.0);
+						double nodeSeparation = (panelDim.height-100)/(network.layerList.get(x).nodeList.size()*1.0);
+						int y1 = (int)(50+n.connectionList.get(i).node1Index*prevLayerNodeSeparation+prevLayerNodeSeparation/2);
+						int y2 = (int)(50+y*nodeSeparation+nodeSeparation/2);
 						g.drawLine(x1, y1, x2, y2);
 					}
 				}
@@ -123,11 +123,11 @@ class DisplayPanel extends JPanel
 		{
 			int dx = 100+x*layerSeparation+layerSeparation/2;
 			
-			int nodeSeparation = (panelDim.height-100)/network.layerList.get(x).nodeList.size();
+			double nodeSeparation = (panelDim.height-100)/(network.layerList.get(x).nodeList.size()*1.0);
 			for(int y = 0;y<network.layerList.get(x).nodeList.size();y++)
 			{
 				Node n = network.layerList.get(x).nodeList.get(y);
-				int dy = 50+y*nodeSeparation+nodeSeparation/2;
+				int dy = (int)(50+y*nodeSeparation+nodeSeparation/2);
 				g.setColor(Color.blue);
 				g.fillOval(dx-25, dy-25, 50, 50);
 				g.setColor(Color.white);
