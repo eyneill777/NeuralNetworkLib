@@ -88,16 +88,17 @@
  				{
  					bestScore = islands[i].bestScore;
  					bestNetwork = islands[i].bestNetwork.getCopy();
- 					bestNetwork.saveNetwork("src/Data/autosave");
+ 					bestNetwork.saveNetwork("Data/autosave");
  				}
  			}
- 			bestNetwork.saveNetwork("src/Data/autosave");
+ 			bestNetwork.saveNetwork("Data/autosave");
  			
  			syncCount++;
  			System.out.println("Total best score "+ bestScore + " Percent Correct "+bestNetwork.percentCorrect);
  			System.out.println();
  			if(displaying)
  				display.repaint(bestNetwork);
+ 			System.gc();
  		}
   	}
   	

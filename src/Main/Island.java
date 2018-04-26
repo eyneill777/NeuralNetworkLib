@@ -10,23 +10,27 @@ public class Island
 	NeuralNet bestNetwork;
   	double bestScore;
  	public double weightRandomness, biasRandomness;
- 	public double baseWeightRandomness = 5, baseBiasRandomness = 1.25, maxWeightRandomness = 10, maxBiasRandomness = 2.5;//must be greater than 0
- 	//private double randomnessResetChance = .1;
- 	private double biasRandomnessModifier = .1, weightRandomnessModifier = .1;
- 	//final int repetitionToModify = 30;
+ 	private final double startingMaxWeightRandomness = 10, startingMaxBiasRandomness = 2.5, startingBaseWeightRandomness = 5, startingBaseBiasRandomness = 1.25, startingBiasRandomnessModifier = .1, startingWeightRandomnessModifier = .1, minWeightRandomness = .00001, minBiasRandomness = .00001;
+ 	public double baseWeightRandomness, baseBiasRandomness, maxWeightRandomness, maxBiasRandomness, biasRandomnessModifier, weightRandomnessModifier;
   	public double worstScore = 0;
  	boolean verbose;
  	final int maxNetworks, minNetworks;
  	public ThreadWrapper wrapper;
- 	double mutateChance = .1;//Should be adjusted based on number of degrees of freedom and size of network pool
+ 	double mutateChance = .01;//Should be adjusted based on number of degrees of freedom and size of network pool
  	double miracleChance = .1;
  	private int layerNo;
  	private int nodeNo;
 	
 	public Island(NeuralNet startingNetwork, TrainingData data, int islandNo, boolean verbose, int numNetworks,int maxNetworks, int minNetworks)
 	{
+		maxWeightRandomness = startingMaxWeightRandomness;
+		maxBiasRandomness = startingMaxBiasRandomness;
+		baseBiasRandomness = startingBaseBiasRandomness;
+		baseWeightRandomness = startingBaseWeightRandomness;
 		weightRandomness = baseWeightRandomness;
 		biasRandomness = baseBiasRandomness;
+		biasRandomnessModifier = startingBiasRandomnessModifier;
+		weightRandomnessModifier = startingWeightRandomnessModifier;
 		this.maxNetworks = maxNetworks;
 		this.minNetworks = minNetworks;
 		this.verbose = verbose;
@@ -81,6 +85,20 @@ public class Island
 				worstScore = score;
 			}
 		}
+		if(weightRandomness<minWeightRandomness)
+		{
+			baseWeightRandomness = startingBaseWeightRandomness;
+			maxWeightRandomness = startingMaxWeightRandomness;
+			weightRandomnessModifier = startingWeightRandomnessModifier;
+			weightRandomness = baseWeightRandomness;
+		}
+		if(biasRandomness<minBiasRandomness)
+		{
+			baseBiasRandomness = startingBaseBiasRandomness;
+			maxBiasRandomness = startingMaxBiasRandomness;
+			biasRandomnessModifier = startingBiasRandomnessModifier;
+			biasRandomness = baseBiasRandomness;
+		}
 		if(weightRandomness>maxWeightRandomness)
 		{
 			baseWeightRandomness/=2;
@@ -113,12 +131,13 @@ public class Island
 	
 	private void reproduceNetworks(ArrayList<NeuralNet> networks)
  	{
-		//layerNo = (int) (Math.random()*(networks.get(0).layerList.size()-1))+1;
-		//nodeNo = (int) (Math.random()*networks.get(0).layerList.get(layerNo).nodeList.size());
+		layerNo = (int) (Math.random()*(networks.get(0).layerList.size()-1))+1;
+		nodeNo = (int) (Math.random()*networks.get(0).layerList.get(layerNo).nodeList.size());
 		//if(layerNo == 2)
 			//nodeNo = (int) (Math.random()*20)+0;
 		//if(layerNo == 3)
 			//nodeNo = (int) (Math.random()*2)+0;
+		//Code for iterating through all nodes
 		/**
 		nodeNo--;
 		if(nodeNo<0)
@@ -134,11 +153,17 @@ public class Island
  		int len = networks.size();
  		for(int i = 1;i<len;i++)
  		{
- 			layerNo = (int) (Math.random()*(networks.get(0).layerList.size()-1))+1;
- 			nodeNo = (int) (Math.random()*networks.get(0).layerList.get(layerNo).nodeList.size());
+ 			//layerNo = (int) (Math.random()*(networks.get(0).layerList.size()-1))+1;
+ 			//nodeNo = (int) (Math.random()*networks.get(0).layerList.get(layerNo).nodeList.size());
  			//if(layerNo == 2)
-			//nodeNo = (int) (Math.random()*100)+200;
- 			NeuralNet n = networks.get(i).breedWithNetwork(networks.get((int)(Math.random()*len)));
+			//nodeNo = (int) (Math.random()*20)+80;
+ 			NeuralNet n2 = networks.get((int)(Math.random()*len));
+ 			NeuralNet n = networks.get(i).breedWithNetwork(n2);
+ 			for(int l = 0; l<n.layerList.size();l++)
+ 			{
+ 				if(n.layerList.get(l).numSuccessfulChanges < n2.layerList.get(l).numSuccessfulChanges)
+ 					n.layerList.get(l).numSuccessfulChanges = n2.layerList.get(l).numSuccessfulChanges;
+ 			}
  			//n.applyMomentum();
  			randomizeNetworkWeights(n);
  			networks.add(n);
@@ -209,6 +234,7 @@ public class Island
  		//for(int l = 2;l<network.layerList.size();l++)
 		int l = layerNo;
  		{
+ 			network.layerList.get(l).numSuccessfulChanges++;
  			//for(int n = 0;n<network.layerList.get(l).nodeList.size();n++)
  			int n = nodeNo;
  			{

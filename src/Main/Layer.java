@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Layer 
 {
 	ArrayList<Node> nodeList = new ArrayList<Node>();
+	int numSuccessfulChanges = 0;
 	
 	public Layer()
 	{

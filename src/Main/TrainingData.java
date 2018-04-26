@@ -14,8 +14,7 @@ import javax.swing.JFrame;
 public class TrainingData 
 {
 	double[][] inputData, expectedOutputData;
-	File[] inputFiles;
-	boolean isPSD;
+	String dataType = "RawImage";
 	int percentCorrectWeight;
 	double error = 0;
 	double percentCorrect = 0;
@@ -23,6 +22,8 @@ public class TrainingData
 	int correctCases = 0;
 	boolean[] outputWeights;
 	int numDataToTest = -1;
+	int[][] files;
+	int xDim, yDim, numData;
 	
 	public TrainingData(double[][] inputData, double[][] expectedOutputData, int percentCorrectWeight)
 	{
@@ -49,21 +50,84 @@ public class TrainingData
 		}
 	}
 	
-	public TrainingData(File[] inputData, double[][] outputData,  boolean isPSD, int percentCorrectWeight)
+	public TrainingData(File[] inputData, double[][] outputData,  String dataType, int percentCorrectWeight, int xDim, int yDim, int numData)
 	{
 		this.percentCorrectWeight = percentCorrectWeight;
-		this.isPSD = isPSD;
-		this.inputFiles = inputData;
+		this.dataType = dataType;
 		expectedOutputData = outputData;
+		this.xDim = xDim;
+		this.yDim = yDim;
+		this.numData = numData;
+		
+		files = new int[inputData.length][];
+		for(int f = 0;f<inputData.length;f++)
+		{
+			File inputFile = inputData[f];
+			files[f] = new int[xDim*yDim*numData];
+			try {
+				FileInputStream stream = new FileInputStream(inputFile);
+				int cnt = 0;
+				int data;
+				while((data= stream.read())!=-1)
+				{
+					files[f][cnt] = data;
+					cnt++;
+				}
+				stream.close();
+			} catch (Exception e) {
+				if(e instanceof IOException)
+					System.out.println("IO Exceiption on " + inputFile.getName());
+				else if(e instanceof FileNotFoundException)
+					System.out.println("File Read Failed on File " + inputFile.getName());
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	public TrainingData(File[] inputData, double[][] outputData,  boolean isPSD, int percentCorrectWeight, int numData)
+	public TrainingData(File[] inputData, double[][] outputData,  String dataType, int percentCorrectWeight, int numDataToTest, int xDim, int yDim, int numData)
 	{
 		this.percentCorrectWeight = percentCorrectWeight;
-		this.isPSD = isPSD;
-		this.inputFiles = inputData;
+		this.dataType = dataType;
 		expectedOutputData = outputData;
-		this.numDataToTest = numData;
+		this.numDataToTest = numDataToTest;
+		this.xDim = xDim;
+		this.yDim = yDim;
+		this.numData = numData;
+		
+		files = new int[inputData.length][];
+		for(int f = 0;f<inputData.length;f++)
+		{
+			File inputFile = inputData[f];
+			files[f] = new int[xDim*yDim*numData];
+			try {
+				FileInputStream stream = new FileInputStream(inputFile);
+				int cnt = 0;
+				int data;
+				while((data= stream.read())!=-1)
+				{
+					files[f][cnt] = data;
+					cnt++;
+				}
+				stream.close();
+			} catch (Exception e) {
+				if(e instanceof IOException)
+					System.out.println("IO Exceiption on " + inputFile.getName());
+				else if(e instanceof FileNotFoundException)
+					System.out.println("File Read Failed on File " + inputFile.getName());
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public TrainingData(int[][] files, double[][] outputData,  String dataType, int percentCorrectWeight, int xDim, int yDim, int numData)
+	{
+		this.percentCorrectWeight = percentCorrectWeight;
+		this.dataType = dataType;
+		expectedOutputData = outputData;
+		this.xDim = xDim;
+		this.yDim = yDim;
+		this.numData = numData;
+		this.files = files;
 	}
 
 	public double testNetwork(NeuralNet network, boolean verbose)
@@ -72,8 +136,8 @@ public class TrainingData
 		percentCorrect = 0;
 		totalCases = 0;
 		correctCases = 0;
-		outputWeights = new boolean[inputFiles.length];
-		for(int i = 0;i<inputFiles.length;i++)
+		outputWeights = new boolean[files.length];
+		for(int i = 0;i<files.length;i++)
 		{
 			outputWeights[i] = false;
 		}
@@ -105,91 +169,35 @@ public class TrainingData
 		}
 		else
 		{
-			if(!isPSD)
+			if(dataType.equals("RawImage") || dataType.equals("PSD"))
 			{
-				for(int f = 0;f<inputFiles.length;f++)
+				for(int f = 0;f<files.length;f++)
 				{
-					File inputFile = inputFiles[f];
-					try {
-						FileInputStream stream = new FileInputStream(inputFile);
-						int xIndex = 0, yIndex = 0;
-						int[][] pixels = new int[28][28];
+					int xIndex = 0, yIndex = 0;
+					int[][] pixels = new int[xDim][yDim];
 						int cnt = 0;
 						int data;
-						while((data=stream.read())!=-1 && (cnt < numDataToTest || numDataToTest < 0))
+						while(cnt<numData && (cnt < numDataToTest || numDataToTest < 0))
 						{
+							int pixIndex = cnt*(xDim*yDim)+yIndex*xDim+xIndex;
+							data = files[f][pixIndex];
 							pixels[xIndex][yIndex] = data;
-							if(xIndex < 27)
+							if(xIndex < xDim-1)
 								xIndex++;
 							else
 							{
 								xIndex = 0;
 								yIndex++;
 							}
-							if(yIndex >= 28)
+							if(yIndex >= yDim)
 							{
-								loadTrainingDataImage(pixels, network);
+								loadTrainingDataImage(xDim,yDim,pixels, network);
 								network.propigateNetwork();
-								calculateError(f,network,verbose,inputFile);
+								calculateError(f,network,verbose);
 								yIndex = 0;
 								cnt++;
 							}
 						}
-						stream.close();
-					} catch (Exception e) {
-						if(e instanceof IOException)
-							System.out.println("IO Exceiption on " + inputFile.getName());
-						else if(e instanceof FileNotFoundException)
-							System.out.println("File Read Failed on File " + inputFile.getName());
-						e.printStackTrace();
-					}
-				}
-				percentCorrect = correctCases*1.0/totalCases;
-				network.percentCorrect = percentCorrect;
-				if(verbose)
-				{
-					System.out.println("Output Modifier: "+getOutputModifier());
-					System.out.println("Correct Cases: "+correctCases);
-					System.out.println("Total Cases: "+totalCases);	
-					System.out.println("Percent correct: "+percentCorrect);
-				}
-			}
-			else
-			{
-				for(int f = 0;f<inputFiles.length;f++)
-				{
-					try 
-					{
-						Scanner scanner = new Scanner(inputFiles[f]);
-						ArrayList<Double> inputData = new ArrayList<Double>();
-						int cnt = 0;
-						while(scanner.hasNextLine() && (cnt < numDataToTest || numDataToTest < 0))
-						{
-							String s = scanner.nextLine();
-							if(!s.equals(""))
-							{
-								String[] ds = s.split("\t");
-								for(int i = 0;i<ds.length;i++)
-								{
-									inputData.add(Double.parseDouble(ds[i]));
-								}
-							}
-							else
-							{
-								for(int i = 0;i<inputData.size();i++)
-								{
-									network.layerList.get(0).nodeList.get(i).setValue(inputData.get(i));
-								}
-								network.propigateNetwork();
-								calculateError(f, network, verbose, inputFiles[f]);
-								inputData.clear();
-								cnt++;
-							}
-						}
-					} catch (FileNotFoundException e) 
-					{
-						e.printStackTrace();
-					}
 				}
 				percentCorrect = correctCases*1.0/totalCases;
 				network.percentCorrect = percentCorrect;
@@ -205,7 +213,7 @@ public class TrainingData
 		return (error+(percentCorrectWeight-percentCorrect*percentCorrectWeight))/getOutputModifier();
 	}
 	
-	private void calculateError(int file, NeuralNet network, boolean verbose, File inputFile)
+	private void calculateError(int file, NeuralNet network, boolean verbose)
 	{
 		double[] eOutput = expectedOutputData[file];
 		double[] output = new double[eOutput.length];
@@ -226,8 +234,11 @@ public class TrainingData
 		double correctness = 0;
 		for(int l = 0;l<eOutput.length;l++)
 		{
-			double d = Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
-			//double d = Math.abs(eOutput[l]-output[l]);
+			double d;
+			if(l==file)
+				d = Math.abs(eOutput[l]-network.layerList.get(network.layerList.size()-1).nodeList.get(l).value);
+			else
+				d = Math.abs(eOutput[l]-output[l]);
 			correctness+=Math.abs(eOutput[l]-output[l]);
 			individualError+=d;
 			//output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
@@ -242,10 +253,11 @@ public class TrainingData
 			outputWeights[file] = true;
 		if(verbose && correctness == 0)
 		{
-			System.out.println(inputFile.getName()+" : "+individualError);
+			System.out.println("File"+file+" : "+individualError);
 			for(int b = 0;b<output.length;b++)
 			{
 				System.out.print(network.layerList.get(network.layerList.size()-1).nodeList.get(b).value+" ");
+				//System.out.print(output[b]+" ");
 			}
 			System.out.print(" : ");
 			for(int b = 0;b<output.length;b++)
@@ -273,23 +285,28 @@ public class TrainingData
 		if(inputData != null)
 			data = new TrainingData(inputData, expectedOutputData, percentCorrectWeight);
 		else
-			data = new TrainingData(inputFiles, expectedOutputData, isPSD, percentCorrectWeight);
+			data = new TrainingData(files, expectedOutputData, dataType, percentCorrectWeight, xDim, yDim, numData);
 		data.numDataToTest = numDataToTest;
 		return data;
 	}
 	
-	private static void loadTrainingDataImage(int[][] pixels, NeuralNet network)
+	private static void loadTrainingDataImage(int xDim, int yDim ,int[][] pixels, NeuralNet network)
 	{
-		Double[] inputData = new Double[28*28];
-		for(int x = 0;x<28;x++)
+		Double[] inputData = new Double[xDim*yDim];
+		//BufferedImage buffer = new BufferedImage(28,28,BufferedImage.TYPE_INT_RGB);
+		for(int x = 0;x<xDim;x++)
 		{
-			for(int y = 0;y<28;y++)
+			for(int y = 0;y<yDim;y++)
 			{
-				if(pixels[x][y] != 0)
-					pixels[x][y] = 255;
-				inputData[x+y*28] = (double) (pixels[x][y]/255);
+				//if(pixels[x][y] > 0 && pixels[x][y]< 105)
+					//pixels[x][y]+=150;
+				inputData[x+y*yDim] = (double) (pixels[x][y]/255);
+				//buffer.setRGB(x, y, new Color(pixels[x][y],pixels[x][y],pixels[x][y]).getRGB());
 			}
 		}
+		//DisplayFrame f = new DisplayFrame(buffer);
+		//f.setSize(50,50);
+		//f.setVisible(true);
 		for(int i = 0;i<inputData.length;i++)
 		{
 			network.layerList.get(0).nodeList.get(i).setValue(inputData[i]);

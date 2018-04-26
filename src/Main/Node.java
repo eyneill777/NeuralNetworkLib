@@ -43,6 +43,11 @@ public class Node
 		}
 	}
 	
+	public void filterInputs()
+	{
+		
+	}
+	
 	public void connectToLayer(Layer l)
 	{
 		for(int i = 0;i<l.nodeList.size();i++)
