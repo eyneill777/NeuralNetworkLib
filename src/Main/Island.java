@@ -265,15 +265,6 @@ public class Island
  		}
  	}
 	
-	public void printMomentums()
-	{
-		System.out.println("avg momentum");
-		for(NeuralNet n:networkList)
-		{
-			System.out.println(n.getAvgMomentum()[1]+"\t"+n.getAvgMomentum()[0]);
-		}
-	}
-	
 	public void mixWith(Island island, NeuralNet topNetwork, double topScore)
 	{
 		int mixCount = networkList.length;

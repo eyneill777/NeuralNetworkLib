@@ -204,27 +204,4 @@ public class NeuralNet
 			e.printStackTrace();
 		}
 	}
-	
-	public double[] getAvgMomentum()
-	{
-		double weightList = 0;
-		double biasList = 0;
-		double weightCount = 0, biasCount = 0;
-		for(Layer l:layerList)
-		{
-			for(Node n:l.nodeList)
-			{
-				biasCount++;
-				//biasList+=Math.abs(n.biasMomentum);
-				for(Connection c:n.connectionList)
-				{
-					weightCount++;
-					//weightList+=Math.abs(c.momentum);
-				}
-			}
-		}
-		weightList/=weightCount;
-		biasList/=biasCount;
-		return new double[]{weightList,biasList};
-	}
 }
