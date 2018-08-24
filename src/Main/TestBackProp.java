@@ -11,7 +11,7 @@ public class TestBackProp
 				//int i = 1;
 				for(Connection c:n.connectionList)
 				{
-					c.weight = Math.random()*-1;
+					c.setWeight(Math.random()*-1);
 					//i*=-1;
 				}
 			}

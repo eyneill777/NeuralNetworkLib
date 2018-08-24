@@ -3,8 +3,9 @@ package Main;
 public class Connection 
 {
 	Node node1, node2;
-	double weight, gradient;
+	private double weight, gradient;
 	int node1Index, node2Index;
+	public int minWeight = -15, maxWeight = 15;
 	//double momentum = 0;
 	
 	public Connection(Node n1, Node n2, double weight, int node1Index, int node2Index)
@@ -33,5 +34,21 @@ public class Connection
 		s+=":";
 		s+=node1Index;
 		return s;
+	}
+
+	public double getGradient() {
+		return gradient;
+	}
+
+	public void setGradient(double gradient) {
+		this.gradient = gradient;
+	}
+	
+	public double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 }

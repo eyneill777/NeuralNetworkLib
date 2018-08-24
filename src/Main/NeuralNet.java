@@ -6,12 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
-
-import org.w3c.dom.NodeList;
 
 public class NeuralNet 
 {
@@ -81,6 +76,14 @@ public class NeuralNet
 		}
 		layerList.get(0).setUnbiased(true);
 		//layerList.get(layerList.size()-1).setUnbiased(true);
+	}
+	
+	public void randomizeWeights()
+	{
+		for(Layer l:layerList)
+		{
+			
+		}
 	}
 	
 	public void setAllWeights(double val)
@@ -157,7 +160,7 @@ public class NeuralNet
 					(new Connection(
 							network.layerList.get(l-1).nodeList.get(this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index),
 							layerList.get(l).nodeList.get(n)
-							, layerList.get(l).nodeList.get(n).connectionList.get(c).weight, true, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node2Index));
+							, layerList.get(l).nodeList.get(n).connectionList.get(c).getWeight(), true, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node1Index, this.layerList.get(l).nodeList.get(n).connectionList.get(c).node2Index));
 					//network.layerList.get(l).nodeList.get(n).connectionList.get(c).momentum = layerList.get(l).nodeList.get(n).connectionList.get(c).momentum;
 				}
 			}
@@ -210,11 +213,11 @@ public class NeuralNet
 				}
 				for(Connection c:n.connectionList)
 				{
-					c.weight+=c.gradient;
-					if(c.weight>15)
-						c.weight = 15;
-					else if(c.weight <-15)
-						c.weight = -15;
+					//c.setWeight(c.getWeight()+c.getGradient());
+					if(c.getWeight()>15)
+						c.setWeight(15);
+					else if(c.getWeight() <-15)
+						c.setWeight(-15);
 				}
 			}
 		}

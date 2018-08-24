@@ -132,8 +132,8 @@ class DisplayPanel extends JPanel implements KeyListener
 				Node n = network.layerList.get(x).nodeList.get(y);
 				for(int i = 0;i<n.connectionList.size();i++)
 				{
-					if(Math.abs(n.connectionList.get(i).weight) > maxWeight)
-						maxWeight = Math.abs(n.connectionList.get(i).weight);
+					if(Math.abs(n.connectionList.get(i).getWeight()) > maxWeight)
+						maxWeight = Math.abs(n.connectionList.get(i).maxWeight);
 				}
 			}
 		}
@@ -147,7 +147,7 @@ class DisplayPanel extends JPanel implements KeyListener
 					Node n = network.layerList.get(x).nodeList.get(y);
 					for(int i = 0;i<n.connectionList.size();i++)
 					{
-						double w = n.connectionList.get(i).weight;
+						double w = n.connectionList.get(i).getWeight();
 						if(w > 0)
 							g.setColor(new Color(0, (int)(30+w/maxWeight*225), 0));
 						else

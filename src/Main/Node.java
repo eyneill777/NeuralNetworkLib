@@ -23,6 +23,19 @@ public class Node
 		this.layer = layer;
 	}
 	
+	public void randomizeWeights()
+	{
+		for(Connection c:connectionList)
+		{
+			c.setWeight(Math.random()*(c.maxWeight-c.minWeight)+c.minWeight);
+		}
+	}
+	
+	public void randomizeBias()
+	{
+		bias = Math.random()*30-15;
+	}
+	
 	public void mixWithNode(Node node2)
 	{
 		if(Math.random()<.5)
@@ -31,7 +44,7 @@ public class Node
 			{
 				if(i<node2.connectionList.size())
 				{
-					connectionList.get(i).weight = node2.connectionList.get(i).weight;
+					connectionList.get(i).setWeight(node2.connectionList.get(i).getWeight());
 				}
 				else
 				{
@@ -46,7 +59,7 @@ public class Node
 	{
 		for(Connection c:connectionList)
 		{
-			c.weight = val;
+			c.setWeight(val);
 		}
 	}
 	
@@ -63,7 +76,7 @@ public class Node
 		double sum = 0;
 		for(int i = 0;i<connectionList.size();i++)
 		{
-			sum+=connectionList.get(i).node1.value*connectionList.get(i).weight;
+			sum+=connectionList.get(i).node1.value*connectionList.get(i).getWeight();
 		}
 		if(!unbiased)
 			sum+=bias;
@@ -77,14 +90,14 @@ public class Node
 			gradient = 0;
 			for(Connection c:connectionList)
 			{
-				c.gradient = 0;
+				c.setGradient(0);
 			}
 		}
 		
 		double sum = 0;
 		for(int i = 0;i<connectionList.size();i++)
 		{
-			sum+=connectionList.get(i).node1.value*connectionList.get(i).weight;
+			sum+=connectionList.get(i).node1.value*connectionList.get(i).getWeight();
 		}
 		if(!unbiased)
 			sum+=bias;
@@ -96,14 +109,14 @@ public class Node
 		System.out.println(gradient+" bgradient");
 		for(Connection c:connectionList)
 		{	
-			c.gradient += dg*(c.weight*c.node1.value)*learnRate;
+			c.setGradient(c.getGradient() + dg*(c.getWeight()*c.node1.value)*learnRate);
 			for(int i = 0;i<depth;i++)
 				System.out.print("\t");
 			System.out.println("node1n value: "+c.node1.value);
-			double desiredChange = grad*c.weight;
+			double desiredChange = grad*c.getWeight();
 			for(int i = 0;i<depth;i++)
 				System.out.print("\t");
-			System.out.println(c.gradient+" wgradient");
+			System.out.println(c.getGradient()+" wgradient");
 			//System.out.println("\t"+c.weight+" weight");
 			c.node1.setGradientAndPropigateBack(desiredChange, reset, learnRate, depth+1);
 		}

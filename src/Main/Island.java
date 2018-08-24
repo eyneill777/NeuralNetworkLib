@@ -55,7 +55,7 @@ public class Island
  		for(int i = 0;i<networkList.length;i++)
  		{
  			networkList[i] = startingNetwork.getCopy();
- 			randomizeNetworkWeights(networkList[i]);
+ 			mutateNetworkWeightsAndBiases(networkList[i]);
  			if(i<numNetworks/10)
  				networkList[i].connectionRadius = maxRadius;
  			else
@@ -196,7 +196,7 @@ public class Island
 		 					n.layerList.get(l).numSuccessfulChanges = n2.layerList.get(l).numSuccessfulChanges;
 		 			}
 		 			//n.applyMomentum();
-		 			randomizeNetworkWeights(n);
+		 			mutateNetworkWeightsAndBiases(n);
 		 			networks.add(n);
  				}
  				//if(!bred)
@@ -267,7 +267,7 @@ public class Island
  		}
  	}
 	
-	private void randomizeNetworkWeights(NeuralNet network)
+	private void mutateNetworkWeightsAndBiases(NeuralNet network)
  	{
 		layerNo = (int) (Math.random()*(network.layerList.size()-1))+1;
 		nodeNo = (int) (Math.random()*network.layerList.get(layerNo).nodeList.size());
@@ -289,14 +289,14 @@ public class Island
 	 				{
 	 					if(Math.random()<mutateChance)
 	 					{
-		 					network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight+=(Math.random()-.5)*weightRandomness;
-		 					if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight > 15)
+		 					network.layerList.get(l).nodeList.get(n).connectionList.get(c).setWeight(network.layerList.get(l).nodeList.get(n).connectionList.get(c).getWeight()+(Math.random()-.5)*weightRandomness);
+		 					if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).getWeight() > 15)
 		 					{
-		 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = 15;
+		 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).setWeight(15);
 		 					}
-		 					else if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight < -15)
+		 					else if(network.layerList.get(l).nodeList.get(n).connectionList.get(c).getWeight() < -15)
 		 					{
-		 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).weight = -15;
+		 						network.layerList.get(l).nodeList.get(n).connectionList.get(c).setWeight(-15);
 		 					}
 	 					}
 	 				}

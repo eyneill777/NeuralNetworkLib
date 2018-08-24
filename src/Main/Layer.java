@@ -2,6 +2,8 @@ package Main;
 
 import java.util.ArrayList;
 
+import org.w3c.dom.NodeList;
+
 public class Layer 
 {
 	public ArrayList<Node> nodeList = new ArrayList<Node>();
@@ -17,6 +19,14 @@ public class Layer
 		for(int i=0;i<numNodes;i++)
 		{
 			nodeList.add(new Node(this));
+		}
+	}
+	
+	public void RandomizeWeights()
+	{
+		for(Node n:nodeList)
+		{
+			n.randomizeWeights();
 		}
 	}
 	
