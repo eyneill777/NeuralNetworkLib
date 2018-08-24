@@ -6,11 +6,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class NetworkDisplay 
+public class NetworkDisplay
 {
 	DisplayPanel panel;
 	
@@ -54,11 +60,52 @@ public class NetworkDisplay
 		frame.add(displayPanel);
 		frame.setVisible(true);
 	}
+	
+	public static void displayNetwork(NeuralNet network, File inputData, int xDim, int yDim, int numData)
+	{
+		int [] files = new int[xDim*yDim*numData];
+		try {
+			FileInputStream stream = new FileInputStream(inputData);
+			int cnt = 0;
+			int data;
+			while((data= stream.read())!=-1)
+			{
+				files[cnt] = data;
+				cnt++;
+			}
+			stream.close();
+		} catch (Exception e) {
+			if(e instanceof IOException)
+				System.out.println("IO Exceiption on " + inputData.getName());
+			else if(e instanceof FileNotFoundException)
+				System.out.println("File Read Failed on File " + inputData.getName());
+			e.printStackTrace();
+		}
+		
+		JFrame frame = new JFrame();
+		DisplayPanel displayPanel = new DisplayPanel(network);
+		displayPanel.addKeyListener(displayPanel);
+		displayPanel.dataFile = files;
+		displayPanel.dataXDim = xDim;
+		displayPanel.dataYDim = yDim;
+		displayPanel.displayingFile = true;
+		displayPanel.currentData = 0;
+		displayPanel.switchInputData();
+		displayPanel.setFocusable(true);
+		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(displayPanel);
+		frame.setVisible(true);
+	}
 }
 
-class DisplayPanel extends JPanel
+class DisplayPanel extends JPanel implements KeyListener
 {
 	NeuralNet network;
+	boolean displayingFile = false;
+	int currentData = 0;
+	int dataXDim, dataYDim;
+	int[] dataFile;
 	
 	public DisplayPanel(NeuralNet network)
 	{
@@ -105,15 +152,16 @@ class DisplayPanel extends JPanel
 							g.setColor(new Color(0, (int)(30+w/maxWeight*225), 0));
 						else
 							g.setColor(new Color((int)(30+Math.abs(w)/maxWeight*225), 0, 0));
-						if(w==0)
-							g.setColor(new Color((int)(30+Math.abs(w)/maxWeight*225), 0, 0, 0));
-						int x1 = 100+(x-1)*layerSeparation+layerSeparation/2;
-						int x2 = 100+(x)*layerSeparation+layerSeparation/2;
-						double prevLayerNodeSeparation = (panelDim.height-100)/(network.layerList.get(x-1).nodeList.size()*1.0);
-						double nodeSeparation = (panelDim.height-100)/(network.layerList.get(x).nodeList.size()*1.0);
-						int y1 = (int)(50+n.connectionList.get(i).node1Index*prevLayerNodeSeparation+prevLayerNodeSeparation/2);
-						int y2 = (int)(50+y*nodeSeparation+nodeSeparation/2);
-						g.drawLine(x1, y1, x2, y2);
+						if(w!=0)
+						{
+							int x1 = 100+(x-1)*layerSeparation+layerSeparation/2;
+							int x2 = 100+(x)*layerSeparation+layerSeparation/2;
+							double prevLayerNodeSeparation = (panelDim.height-100)/(network.layerList.get(x-1).nodeList.size()*1.0);
+							double nodeSeparation = (panelDim.height-100)/(network.layerList.get(x).nodeList.size()*1.0);
+							int y1 = (int)(50+n.connectionList.get(i).node1Index*prevLayerNodeSeparation+prevLayerNodeSeparation/2);
+							int y2 = (int)(50+y*nodeSeparation+nodeSeparation/2);
+							g.drawLine(x1, y1, x2, y2);
+						}
 					}
 				}
 			}
@@ -135,5 +183,39 @@ class DisplayPanel extends JPanel
 				g.drawString(s, dx-10, dy+5);
 			}
 		}
+	}
+	
+	public void switchInputData()
+	{
+		int n = 0;
+		for(int i = currentData*dataXDim*dataYDim;i<(currentData+1)*dataXDim*dataYDim;i++)
+		{
+			network.layerList.get(0).nodeList.get(n).setValue(dataFile[i]/255.0);
+			n++;
+		}	
+		network.propigateNetwork();
+		repaint();
+		currentData++;
+	}
+
+	@Override
+	public void keyPressed(KeyEvent arg0) 
+	{
+		if(arg0.getKeyCode()==KeyEvent.VK_ENTER)
+		{
+			switchInputData();
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

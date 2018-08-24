@@ -24,6 +24,7 @@ public class TrainingData
 	int numDataToTest = -1;
 	int[][] files;
 	int xDim, yDim, numData;
+	boolean useHighestValue;
 	
 	public TrainingData(double[][] inputData, double[][] expectedOutputData, int percentCorrectWeight)
 	{
@@ -136,11 +137,6 @@ public class TrainingData
 		percentCorrect = 0;
 		totalCases = 0;
 		correctCases = 0;
-		outputWeights = new boolean[files.length];
-		for(int i = 0;i<files.length;i++)
-		{
-			outputWeights[i] = false;
-		}
 		
 		if(inputData != null)
 		{
@@ -169,6 +165,11 @@ public class TrainingData
 		}
 		else
 		{
+			outputWeights = new boolean[files.length];
+			for(int i = 0;i<files.length;i++)
+			{
+				outputWeights[i] = false;
+			}
 			if(dataType.equals("RawImage") || dataType.equals("PSD"))
 			{
 				for(int f = 0;f<files.length;f++)
@@ -226,10 +227,17 @@ public class TrainingData
 		}
 		for(int l = 0;l<eOutput.length;l++)
 		{
-			if(network.layerList.get(network.layerList.size()-1).nodeList.get(l).value < maxValue)
-				output[l] = 0;
+			if(useHighestValue)
+			{
+				if(network.layerList.get(network.layerList.size()-1).nodeList.get(l).value < maxValue)
+					output[l] = 0;
+				else
+					output[l] = 1;
+			}
 			else
-				output[l] = 1;
+			{
+				output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
+			}
 		}
 		double correctness = 0;
 		for(int l = 0;l<eOutput.length;l++)
@@ -241,7 +249,7 @@ public class TrainingData
 				d = Math.abs(eOutput[l]-output[l]);
 			correctness+=Math.abs(eOutput[l]-output[l]);
 			individualError+=d;
-			//output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
+			output[l] = network.layerList.get(network.layerList.size()-1).nodeList.get(l).value;
 		}
 		error+=individualError;
 		totalCases++;
@@ -270,13 +278,20 @@ public class TrainingData
 	
 	private int getOutputModifier()
 	{
-		int sum = 1;
-		for(int i = 0;i<outputWeights.length;i++)
+		try
 		{
-			if(outputWeights[i])
-				sum++;
+			int sum = 1;
+			for(int i = 0;i<outputWeights.length;i++)
+			{
+				if(outputWeights[i])
+					sum++;
+			}
+			return sum;
 		}
-		return sum;
+		catch(NullPointerException e)
+		{
+			return 1;
+		}
 	}
 	
 	public TrainingData getCopy()
@@ -293,14 +308,14 @@ public class TrainingData
 	private static void loadTrainingDataImage(int xDim, int yDim ,int[][] pixels, NeuralNet network)
 	{
 		Double[] inputData = new Double[xDim*yDim];
-		//BufferedImage buffer = new BufferedImage(28,28,BufferedImage.TYPE_INT_RGB);
+		//BufferedImage buffer = new BufferedImage(xDim,yDim,BufferedImage.TYPE_INT_RGB);
 		for(int x = 0;x<xDim;x++)
 		{
 			for(int y = 0;y<yDim;y++)
 			{
 				//if(pixels[x][y] > 0 && pixels[x][y]< 105)
 					//pixels[x][y]+=150;
-				inputData[x+y*yDim] = (double) (pixels[x][y]/255);
+				inputData[x+y*yDim] = (double) (pixels[x][y]/255.0);
 				//buffer.setRGB(x, y, new Color(pixels[x][y],pixels[x][y],pixels[x][y]).getRGB());
 			}
 		}

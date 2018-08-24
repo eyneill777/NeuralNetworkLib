@@ -1,22 +1,29 @@
 package Main;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.w3c.dom.NodeList;
 
 public class NeuralNet 
 {
-	ArrayList<Layer> layerList = new ArrayList<Layer>();
+	//double biasMomentumFriction = 1.1; @deprecated
+	public ArrayList<Layer> layerList = new ArrayList<Layer>();
 	double outputThreshold = .85;
 	double score = -1;
 	double percentCorrect = 0;
-	double biasMomentumFriction = 1.1;
-	double weightMomentumFriction = 1.1;
+	//double weightMomentumFriction = 1.1; @deprecated
+	public ArrayList<NeuralNet> linkedNetworks = new ArrayList<NeuralNet>();
+	public Point mapCoord;
+	public double connectionRadius;
 	
 	public NeuralNet()
 	{
@@ -70,6 +77,8 @@ public class NeuralNet
 				e.printStackTrace();
 		}
 	}
+	
+	//@deprecated experimental feature
 	/**
 	//public void applyMomentum()
 	{
@@ -87,6 +96,15 @@ public class NeuralNet
 		}
 	}
 	**/
+	
+	public void setAllWeights(double val)
+	{
+		for(Layer l:layerList)
+		{
+			l.setAllWeights(val);
+		}
+	}
+	
 	private void parseNode(String s, int layerNo)
 	{
 		String[] info = s.split(";");
@@ -99,9 +117,12 @@ public class NeuralNet
 		layerList.get(layerNo).nodeList.add(n);
 	}
 	
-	public NeuralNet breedWithNetwork(NeuralNet network2)
+	public NeuralNet breedWithNetwork(NeuralNet network2, int maxDistanceFromParent, double newRadius)
 	{
 		NeuralNet mixedNetwork = getCopy();
+		mixedNetwork.mapCoord.x+=(Math.random()-.5)*maxDistanceFromParent;
+		mixedNetwork.mapCoord.y+=(Math.random()-.5)*maxDistanceFromParent;
+		mixedNetwork.connectionRadius = newRadius;
 		for(int i = 0;i<layerList.size();i++)
 		{
 			Layer layer1 = mixedNetwork.layerList.get(i);
@@ -114,7 +135,7 @@ public class NeuralNet
 				System.out.println("TODO Error: too many layers.  See NeuralNet.breedWithNetwork");
 			}
 		}
-		return network2;
+		return mixedNetwork;
 	}
 	
 	public void propigateNetwork()
@@ -158,9 +179,13 @@ public class NeuralNet
 		network.outputThreshold = this.outputThreshold;
 		network.percentCorrect = this.percentCorrect;
 		network.score = this.score;
+		network.connectionRadius = this.connectionRadius;
+		network.mapCoord = new Point(this.mapCoord.x, this.mapCoord.y);
 		return network;
 	}
 	
+	//@deprecated experimental feature
+	/**
 	//Apply 'friction' and slow the speed of the networks momentum
 	public void slowMomentum()
 	{
@@ -176,6 +201,7 @@ public class NeuralNet
 			}
 		}
 	}
+	**/
 	
 	public void saveNetwork(String filePath)
 	{
