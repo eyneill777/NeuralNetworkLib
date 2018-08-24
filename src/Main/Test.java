@@ -1,5 +1,6 @@
 package Main;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,11 +36,11 @@ public class Test
 		{
 			runtimes[i] = 0;
 		}
-		GeneticGenerator generator = null;
+		GeneticGenerator generator = new GeneticGenerator(trainingData, 10, network, 6, true, 0, 400, 30, new Dimension(100,100), true);
 		for(int i = 0;i<numTests;i++)
 		{
 			long t = System.currentTimeMillis();
-			generator = new GeneticGenerator(trainingData, 1000, network, 1, false, 0, 100000,10);
+			generator = new GeneticGenerator(trainingData, 1000, network, 1, false, 0, 100000,10 , new Dimension(100,100));
 			generator.trainNetwork();
 			t = System.currentTimeMillis()-t;
 			System.out.println("time " +t);

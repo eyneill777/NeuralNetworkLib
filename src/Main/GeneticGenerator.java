@@ -1,6 +1,7 @@
 package Main;
  
- import java.util.ArrayList;
+ import java.awt.Dimension;
+import java.util.ArrayList;
  
  public class GeneticGenerator 
  {
@@ -13,10 +14,14 @@ package Main;
  	int passingScore;
  	int maxNetworks, minNetworks;
  	boolean displaying = false;
- 	NetworkDisplay display;
+ 	NetworkDisplay networkDisplay;
+ 	DistanceMapDisplay distanceMapDisplay;
+ 	final int maxRadius = 100, minRadius = 20;
+ 	Dimension mapDimension;
   	
-  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks)
+  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks, Dimension mapDim)
   	{
+  		this.mapDimension = mapDim;
   		this.maxNetworks = maxNetworks;
   		this.minNetworks = minNetworks;
   		this.verbose = verbose;
@@ -29,12 +34,13 @@ package Main;
  		
  		for(int i = 0;i<numIslands;i++)
  		{
- 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks);
+ 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks, minRadius, maxRadius, mapDimension);
  		}
  	}
   	
-  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks, boolean displaying)
+  	public GeneticGenerator(TrainingData data, int numNetworks, NeuralNet startingNetwork, int numIslands, boolean verbose, int passingScore, int maxNetworks, int minNetworks, Dimension mapDim, boolean displaying)
   	{
+  		this.mapDimension = mapDim;
   		this.maxNetworks = maxNetworks;
   		this.minNetworks = minNetworks;
   		this.verbose = verbose;
@@ -47,12 +53,13 @@ package Main;
  		
  		for(int i = 0;i<numIslands;i++)
  		{
- 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks);
+ 			islands[i] = new Island(startingNetwork, data.getCopy(), i, verbose, numNetworks, maxNetworks, minNetworks, minRadius, maxRadius, mapDimension);
  		}
  		this.displaying = displaying;
  		if(displaying)
  		{
- 			display = new NetworkDisplay(bestNetwork);
+ 			networkDisplay = new NetworkDisplay(bestNetwork);
+ 			distanceMapDisplay = new DistanceMapDisplay(islands[0]);
  		}
  	}
   	
@@ -88,16 +95,19 @@ package Main;
  				{
  					bestScore = islands[i].bestScore;
  					bestNetwork = islands[i].bestNetwork.getCopy();
- 					bestNetwork.saveNetwork("Data/autosave");
+ 					bestNetwork.saveNetwork("src/Data/autosave");
  				}
  			}
- 			bestNetwork.saveNetwork("Data/autosave");
+ 			bestNetwork.saveNetwork("src/Data/autosave");
  			
  			syncCount++;
  			System.out.println("Total best score "+ bestScore + " Percent Correct "+bestNetwork.percentCorrect);
  			System.out.println();
  			if(displaying)
- 				display.repaint(bestNetwork);
+ 			{
+ 				networkDisplay.repaint(bestNetwork);
+ 				distanceMapDisplay.repaint(islands[0]);
+ 			}
  			System.gc();
  		}
   	}
@@ -110,9 +120,16 @@ package Main;
   			{
   				if(i != j)
   				{
-  					islands[i].mixWith(islands[j], bestNetwork, bestScore);
-  					//islands[i].weightRandomness = islands[i].baseWeightRandomness;
-  					//islands[i].biasRandomness = islands[i].baseBiasRandomness;
+  					try
+  					{
+  						islands[i].mixWith(islands[j], bestNetwork, bestScore);
+  						//islands[i].weightRandomness = islands[i].baseWeightRandomness;
+  	  					//islands[i].biasRandomness = islands[i].baseBiasRandomness;
+  					}
+  					catch(NullPointerException e)
+  					{
+  						
+  					}
   				}
   			}
   		}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Layer 
 {
-	ArrayList<Node> nodeList = new ArrayList<Node>();
+	public ArrayList<Node> nodeList = new ArrayList<Node>();
 	int numSuccessfulChanges = 0;
 	
 	public Layer()
@@ -31,6 +31,14 @@ public class Layer
 		for(Node n:nodeList)
 		{
 			n.calculateValue();
+		}
+	}
+	
+	public void setAllWeights(double val)
+	{
+		for(Node n:nodeList)
+		{
+			n.setAllWeights(val);
 		}
 	}
 	

@@ -6,6 +6,7 @@ public class BackPropigationTrainer
 	private TrainingData data;
 	int repeatsToStop = 30;
 	double error;
+	private double learnRate = .1;
 	NetworkDisplay display;
 	
 	public BackPropigationTrainer(NeuralNet network, TrainingData data, NetworkDisplay display)

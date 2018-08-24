@@ -42,9 +42,12 @@ public class Node
 		}
 	}
 	
-	public void filterInputs()
+	public void setAllWeights(double val)
 	{
-		
+		for(Connection c:connectionList)
+		{
+			c.weight = val;
+		}
 	}
 	
 	public void connectToLayer(Layer l)
