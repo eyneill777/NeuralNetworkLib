@@ -24,6 +24,7 @@ public class TrainingData
 	int numDataToTest = -1;
 	int[][] files;
 	int xDim, yDim, numData;
+	private double learnRate = .1;
 	
 	public TrainingData(double[][] inputData, double[][] expectedOutputData, int percentCorrectWeight)
 	{
@@ -130,17 +131,12 @@ public class TrainingData
 		this.files = files;
 	}
 
-	public double testNetwork(NeuralNet network, boolean verbose)
+	public double testNetwork(NeuralNet network, boolean verbose, String trainerType)
 	{
 		error = 0;
 		percentCorrect = 0;
 		totalCases = 0;
 		correctCases = 0;
-		outputWeights = new boolean[files.length];
-		for(int i = 0;i<files.length;i++)
-		{
-			outputWeights[i] = false;
-		}
 		
 		if(inputData != null)
 		{
@@ -156,7 +152,22 @@ public class TrainingData
 				network.propigateNetwork();
 				for(int i = 0;i<eOutput.length;i++)
 				{
-					double d = Math.abs(eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					double grad = eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value;
+					double d = Math.abs(grad);
+					System.out.println("grad"+grad+" "+eOutput[i]+" "+network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					
+					if(trainerType.equals("Backpropigation"))
+					{
+						if(dataSet == 0)
+						{
+							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, true, learnRate, 1);
+						}
+						else
+						{
+							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, false, learnRate, 1);
+						}
+					}
+					
 					individualError+=d;
 					error+=d;
 				}
@@ -169,6 +180,12 @@ public class TrainingData
 		}
 		else
 		{
+			outputWeights = new boolean[files.length];
+			for(int i = 0;i<files.length;i++)
+			{
+				outputWeights[i] = false;
+			}
+			
 			if(dataType.equals("RawImage") || dataType.equals("PSD"))
 			{
 				for(int f = 0;f<files.length;f++)
@@ -210,7 +227,10 @@ public class TrainingData
 				}
 			}
 		}
-		return (error+(percentCorrectWeight-percentCorrect*percentCorrectWeight))/getOutputModifier();
+		if(trainerType.equals("Genetic"))
+			return (error+(percentCorrectWeight-percentCorrect*percentCorrectWeight))/getOutputModifier();
+		else
+			return error;
 	}
 	
 	private void calculateError(int file, NeuralNet network, boolean verbose)
@@ -311,5 +331,13 @@ public class TrainingData
 		{
 			network.layerList.get(0).nodeList.get(i).setValue(inputData[i]);
 		}
+	}
+
+	public double getLearnRate() {
+		return learnRate;
+	}
+
+	public void setLearnRate(double learnRate) {
+		this.learnRate = learnRate;
 	}
 }

@@ -3,7 +3,7 @@ package Main;
 public class Connection 
 {
 	Node node1, node2;
-	double weight;
+	double weight, gradient;
 	int node1Index, node2Index;
 	//double momentum = 0;
 	

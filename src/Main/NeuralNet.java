@@ -15,8 +15,7 @@ public class NeuralNet
 	double outputThreshold = .85;
 	double score = -1;
 	double percentCorrect = 0;
-	double biasMomentumFriction = 1.1;
-	double weightMomentumFriction = 1.1;
+	
 	
 	public NeuralNet()
 	{
@@ -29,6 +28,8 @@ public class NeuralNet
 		{
 			layerList.add(new Layer());
 		}
+		layerList.get(0).setUnbiased(true);
+		//layerList.get(layerList.size()-1).setUnbiased(true);
 	}
 	
 	public NeuralNet(int[] layerSizes)
@@ -41,6 +42,8 @@ public class NeuralNet
 				layerList.get(i).connectLayer(layerList.get(i-1));
 			}
 		}
+		layerList.get(0).setUnbiased(true);
+		//layerList.get(layerList.size()-1).setUnbiased(true);
 	}
 	
 	public NeuralNet(String filePath)
@@ -69,24 +72,10 @@ public class NeuralNet
 		{
 				e.printStackTrace();
 		}
+		layerList.get(0).setUnbiased(true);
+		//layerList.get(layerList.size()-1).setUnbiased(true);
 	}
-	/**
-	//public void applyMomentum()
-	{
-		for(int i = 0;i<layerList.size();i++)
-		{
-			for(int n = 0;n<layerList.get(i).nodeList.size();n++)
-			{
-				Node node = layerList.get(i).nodeList.get(n);
-				//node.bias+=node.biasMomentum;
-				for(Connection c:node.connectionList)
-				{
-					//c.weight+=c.momentum;
-				}
-			}
-		}
-	}
-	**/
+	
 	private void parseNode(String s, int layerNo)
 	{
 		String[] info = s.split(";");
@@ -161,22 +150,6 @@ public class NeuralNet
 		return network;
 	}
 	
-	//Apply 'friction' and slow the speed of the networks momentum
-	public void slowMomentum()
-	{
-		for(Layer l:layerList)
-		{
-			for(Node n:l.nodeList)
-			{
-				//n.biasMomentum = n.biasMomentum/weightMomentumFriction;
-				for(Connection c:n.connectionList)
-				{
-					//c.momentum/=weightMomentumFriction;
-				}
-			}
-		}
-	}
-	
 	public void saveNetwork(String filePath)
 	{
 		File file = new File(filePath);
@@ -202,6 +175,28 @@ public class NeuralNet
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void updateWeights()
+	{
+		for(Layer l:layerList)
+		{
+			for(Node n: l.nodeList)
+			{
+				if(!n.unbiased)
+				{
+					n.bias+=n.gradient;
+				}
+				for(Connection c:n.connectionList)
+				{
+					c.weight+=c.gradient;
+					if(c.weight>15)
+						c.weight = 15;
+					else if(c.weight <-15)
+						c.weight = -15;
+				}
+			}
 		}
 	}
 }

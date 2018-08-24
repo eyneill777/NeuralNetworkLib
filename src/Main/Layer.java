@@ -48,4 +48,12 @@ public class Layer
 			}
 		}
 	}
+	
+	public void setUnbiased(boolean unbiased)
+	{
+		for(Node n:nodeList)
+		{
+			n.unbiased = unbiased;
+		}
+	}
 }

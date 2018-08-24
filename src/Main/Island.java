@@ -40,7 +40,7 @@ public class Island
 		this.nodeNo = startingNetwork.layerList.get(layerNo).nodeList.size()-1;
 		
 		bestNetwork = startingNetwork;
- 		bestScore = data.testNetwork(startingNetwork, false);
+ 		bestScore = data.testNetwork(startingNetwork, false, "Genetic");
  		networkList = new NeuralNet[numNetworks];
  		for(int i = 0;i<networkList.length;i++)
  		{
@@ -69,7 +69,7 @@ public class Island
 		double lastBest = bestScore;
 		for(int i = 0;i<networkList.length;i++)
 		{
-			double score = data.testNetwork(networkList[i], false);
+			double score = data.testNetwork(networkList[i], false, "Genetic");
 			networkList[i].score = score;
 			
 			if(networkList[i] == null)
