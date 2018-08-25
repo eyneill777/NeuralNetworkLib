@@ -8,13 +8,14 @@ public class Layer
 {
 	public ArrayList<Node> nodeList = new ArrayList<Node>();
 	int numSuccessfulChanges = 0;
+	NeuralNet network;
 	
-	public Layer()
+	public Layer(NeuralNet network)
 	{
 		
 	}
 	
-	public Layer(int numNodes)
+	public Layer(int numNodes, NeuralNet network)
 	{
 		for(int i=0;i<numNodes;i++)
 		{
@@ -27,6 +28,14 @@ public class Layer
 		for(Node n:nodeList)
 		{
 			n.randomizeWeights();
+		}
+	}
+	
+	public void RandomizeBiases()
+	{
+		for(Node n:nodeList)
+		{
+			n.randomizeBias();
 		}
 	}
 	

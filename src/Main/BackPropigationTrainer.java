@@ -7,6 +7,14 @@ public class BackPropigationTrainer
 	int repeatsToStop = 30;
 	double error;
 	private double learnRate = .1;
+	public double getLearnRate() {
+		return learnRate;
+	}
+
+	public void setLearnRate(double learnRate) {
+		this.learnRate = learnRate;
+	}
+
 	NetworkDisplay display;
 	
 	public BackPropigationTrainer(NeuralNet network, TrainingData data, NetworkDisplay display)
@@ -34,7 +42,7 @@ public class BackPropigationTrainer
 			}
 			else
 			{
-				network.updateWeights();
+				network.updateBackpropWeights(learnRate);
 			}
 			score = error;
 			System.out.println("error "+error);

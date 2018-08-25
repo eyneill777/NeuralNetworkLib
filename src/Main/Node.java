@@ -8,6 +8,8 @@ public class Node
 	ArrayList<Connection> connectionList = new ArrayList<Connection>();
 	Layer layer;
 	boolean unbiased = false;
+	int maxBias = 15, minBias = -15;
+	double inputErrorSignal = 0;
 	
 	public Node(Layer layer)
 	{
@@ -33,7 +35,7 @@ public class Node
 	
 	public void randomizeBias()
 	{
-		bias = Math.random()*30-15;
+		bias = Math.random()*(maxBias-minBias)+minBias;
 	}
 	
 	public void mixWithNode(Node node2)
@@ -83,42 +85,33 @@ public class Node
 		setValue(activationFunction(sum));
 	}
 	
-	public void setGradientAndPropigateBack(double grad, boolean reset, double learnRate, int depth)
+	private double getOutputNodeErrorSignal(double targetValue)
 	{
-		if(reset)
-		{
-			gradient = 0;
-			for(Connection c:connectionList)
-			{
-				c.setGradient(0);
-			}
-		}
+		inputErrorSignal = (targetValue-getValue())*activationFunctionDerivative(getValue())*(1-getValue());
+		System.out.println(targetValue+"\t"+getValue()+"\t"+activationFunctionDerivative(getValue())+"\t");
+		return inputErrorSignal;
+	}
+	
+	private double getHiddenLayerErrorSignal()
+	{
+		double d = getValue()*(1-getValue());
+		return d * inputErrorSignal;
 		
-		double sum = 0;
-		for(int i = 0;i<connectionList.size();i++)
+	}
+	
+	public void setGradientAndPropigateBack(boolean reset, int depth, double targetVal)
+	{	
+		if(depth <= 1)
 		{
-			sum+=connectionList.get(i).node1.value*connectionList.get(i).getWeight();
+			inputErrorSignal = getOutputNodeErrorSignal(targetVal);
 		}
-		if(!unbiased)
-			sum+=bias;
-		double dg = (grad)*activationFunctionDerivative(sum);
-		double db = (grad)*activationFunctionDerivative(sum);
-		gradient+=db*learnRate;
-		for(int i = 0;i<depth;i++)
-			System.out.print("\t");
-		System.out.println(gradient+" bgradient");
+		else
+		{
+			inputErrorSignal = getHiddenLayerErrorSignal();
+		}
 		for(Connection c:connectionList)
 		{	
-			c.setGradient(c.getGradient() + dg*(c.getWeight()*c.node1.value)*learnRate);
-			for(int i = 0;i<depth;i++)
-				System.out.print("\t");
-			System.out.println("node1n value: "+c.node1.value);
-			double desiredChange = grad*c.getWeight();
-			for(int i = 0;i<depth;i++)
-				System.out.print("\t");
-			System.out.println(c.getGradient()+" wgradient");
-			//System.out.println("\t"+c.weight+" weight");
-			c.node1.setGradientAndPropigateBack(desiredChange, reset, learnRate, depth+1);
+			c.node1.inputErrorSignal+=inputErrorSignal*c.getWeight();
 		}
 	}
 	

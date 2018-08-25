@@ -28,7 +28,7 @@ public class NeuralNet
 	{
 		for(int i = 0;i<numLayers;i++)
 		{
-			layerList.add(new Layer());
+			layerList.add(new Layer(this));
 		}
 		layerList.get(0).setUnbiased(true);
 		//layerList.get(layerList.size()-1).setUnbiased(true);
@@ -38,7 +38,7 @@ public class NeuralNet
 	{
 		for(int i = 0;i<layerSizes.length;i++)
 		{
-			layerList.add(new Layer(layerSizes[i]));
+			layerList.add(new Layer(layerSizes[i], this));
 			if(i>0)
 			{
 				layerList.get(i).connectLayer(layerList.get(i-1));
@@ -59,7 +59,7 @@ public class NeuralNet
 			while(scanner.hasNextLine())
 			{
 				String s = scanner.nextLine();
-				Layer l = new Layer();
+				Layer l = new Layer(this);
 				layerList.add(l);
 				
 				String[] nodes = s.split(",");
@@ -82,7 +82,15 @@ public class NeuralNet
 	{
 		for(Layer l:layerList)
 		{
-			
+			l.RandomizeWeights();
+		}
+	}
+	
+	public void randomizeBiases()
+	{
+		for(Layer l:layerList)
+		{
+			l.RandomizeBiases();
 		}
 	}
 	
@@ -147,7 +155,7 @@ public class NeuralNet
 		NeuralNet network = new NeuralNet();
 		for(int l = 0;l<layerList.size();l++)
 		{
-			network.layerList.add(new Layer());
+			network.layerList.add(new Layer(this));
 			for(int n = 0;n<layerList.get(l).nodeList.size();n++)
 			{
 				network.layerList.get(l).nodeList.add(new Node(layerList.get(l).nodeList.get(n).bias, layerList.get(l).nodeList.get(n).value, network.layerList.get(l)));
@@ -201,7 +209,28 @@ public class NeuralNet
 		}
 	}
 	
-	public void updateWeights()
+	public void setGradientAndPropigateBack(boolean reset, double[] targetVal)
+	{
+		int cnt = 1;
+		for(int l = layerList.size()-1;l>=0;l--)
+		{
+			Layer layer = layerList.get(l);
+			for(int n = 0;n<layer.nodeList.size();n++)
+			{
+				Node node = layer.nodeList.get(n);
+				if(cnt == 1)
+					node.setGradientAndPropigateBack(reset, cnt ,targetVal[n]);
+				else
+					node.setGradientAndPropigateBack(reset, cnt , -1);
+				System.out.print(node.inputErrorSignal+"\t");
+			}
+			System.out.println();
+			cnt++;
+		}
+		System.out.println();
+	}
+	
+	public void updateBackpropWeights(double learnRate)
 	{
 		for(Layer l:layerList)
 		{
@@ -213,11 +242,12 @@ public class NeuralNet
 				}
 				for(Connection c:n.connectionList)
 				{
-					//c.setWeight(c.getWeight()+c.getGradient());
-					if(c.getWeight()>15)
-						c.setWeight(15);
-					else if(c.getWeight() <-15)
-						c.setWeight(-15);
+					c.setGradient(c.node1.inputErrorSignal*learnRate*c.node2.getValue());
+					c.setWeight(c.getWeight()+c.getGradient());
+					if(c.getWeight()>c.maxWeight)
+						c.setWeight(c.maxWeight);
+					else if(c.getWeight() < c.minWeight)
+						c.setWeight(c.minWeight);
 				}
 			}
 		}

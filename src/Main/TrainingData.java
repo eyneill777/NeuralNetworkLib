@@ -25,7 +25,6 @@ public class TrainingData
 	int[][] files;
 	int xDim, yDim, numData;
 	boolean useHighestValue;
-	private double learnRate = .01;
 	
 	public TrainingData(double[][] inputData, double[][] expectedOutputData, int percentCorrectWeight)
 	{
@@ -153,25 +152,25 @@ public class TrainingData
 				network.propigateNetwork();
 				for(int i = 0;i<eOutput.length;i++)
 				{
-					double grad = eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value;
-					double d = Math.abs(grad);
-					System.out.println("grad"+grad+" "+eOutput[i]+" "+network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
-					
-					if(trainerType.equals("Backpropigation"))
-					{
-						if(dataSet == 0)
-						{
-							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, true, learnRate, 1);
-						}
-						else
-						{
-							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, false, learnRate, 1);
-						}
-					}
+					double d = Math.abs(eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					//System.out.println("grad"+grad+" "+eOutput[i]+" "+network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
 					
 					individualError+=d;
 					error+=d;
 				}
+				
+				if(trainerType.equals("Backpropigation"))
+				{
+					if(dataSet == 0)
+					{
+						network.setGradientAndPropigateBack(true, eOutput);
+					}
+					else
+					{
+						network.setGradientAndPropigateBack(false, eOutput);
+					}
+				}
+				
 				if(individualError == 0)
 					correctCases++;
 				totalCases++;
@@ -254,25 +253,25 @@ public class TrainingData
 				network.propigateNetwork();
 				for(int i = 0;i<eOutput.length;i++)
 				{
-					double grad = eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value;
-					double d = Math.abs(grad);
-					System.out.println("grad"+grad+" "+eOutput[i]+" "+network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
-					
-					if(trainerType.equals("Backpropigation"))
-					{
-						if(dataSet == 0)
-						{
-							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, true, learnRate, 1);
-						}
-						else
-						{
-							network.layerList.get(network.layerList.size()-1).nodeList.get(i).setGradientAndPropigateBack(grad, false, learnRate, 1);
-						}
-					}
+					double d = Math.abs(eOutput[i]-network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
+					//System.out.println("grad"+grad+" "+eOutput[i]+" "+network.layerList.get(network.layerList.size()-1).nodeList.get(i).value);
 					
 					individualError+=d;
 					error+=d;
 				}
+				
+				if(trainerType.equals("Backpropigation"))
+				{
+					if(dataSet == 0)
+					{
+						network.setGradientAndPropigateBack(true, eOutput);
+					}
+					else
+					{
+						network.setGradientAndPropigateBack(false, eOutput);
+					}
+				}
+				
 				if(individualError == 0)
 					correctCases++;
 				totalCases++;
@@ -446,13 +445,5 @@ public class TrainingData
 		{
 			network.layerList.get(0).nodeList.get(i).setValue(inputData[i]);
 		}
-	}
-
-	public double getLearnRate() {
-		return learnRate;
-	}
-
-	public void setLearnRate(double learnRate) {
-		this.learnRate = learnRate;
 	}
 }
