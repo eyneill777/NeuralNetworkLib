@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 public class Node 
 {
-	double bias, value, gradient;
+	double bias, biasGrad = 0, value, gradient;
 	ArrayList<Connection> connectionList = new ArrayList<Connection>();
 	Layer layer;
 	boolean unbiased = false;
 	int maxBias = 15, minBias = -15;
-	double inputErrorSignal = 0;
-	
+	private double inputErrorSignal = 0;
+
 	public Node(Layer layer)
 	{
 		bias = 0;
@@ -85,21 +85,21 @@ public class Node
 		setValue(activationFunction(sum));
 	}
 	
-	private double getOutputNodeErrorSignal(double targetValue)
+	public double getOutputNodeErrorSignal(double targetValue)
 	{
-		inputErrorSignal = (targetValue-getValue())*activationFunctionDerivative(getValue())*(1-getValue());
-		System.out.println(targetValue+"\t"+getValue()+"\t"+activationFunctionDerivative(getValue())+"\t");
-		return inputErrorSignal;
+		double ErrorSignal = (targetValue-getValue()*getValue()*(1-getValue()));
+		System.out.println(targetValue+"\t"+getValue()+"\t");
+		return ErrorSignal;
 	}
 	
 	private double getHiddenLayerErrorSignal()
 	{
 		double d = getValue()*(1-getValue());
+		//System.out.println("\t\t"+getValue()+"\t"+inputErrorSignal);
 		return d * inputErrorSignal;
-		
 	}
 	
-	public void setGradientAndPropigateBack(boolean reset, int depth, double targetVal)
+	public void setGradient(boolean reset, int depth, double targetVal)
 	{	
 		if(depth <= 1)
 		{
@@ -113,16 +113,7 @@ public class Node
 		{	
 			c.node1.inputErrorSignal+=inputErrorSignal*c.getWeight();
 		}
-	}
-	
-	//private double calcErrorSignal()
-	{
-		
-		
-		double e;
-		//double dg = activationFunctionDerivative(sum);
-		//double dk = 
-		//return e;
+		this.gradient = inputErrorSignal*activationFunctionDerivative(getValue());
 	}
 	
 	private double activationFunctionDerivative(double x)
@@ -151,5 +142,13 @@ public class Node
 
 	public void setValue(double value) {
 		this.value = value;
+	}
+	
+	public double getInputErrorSignal() {
+		return inputErrorSignal;
+	}
+
+	public void setInputErrorSignal(double inputErrorSignal) {
+		this.inputErrorSignal = inputErrorSignal;
 	}
 }

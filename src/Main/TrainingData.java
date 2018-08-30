@@ -169,6 +169,8 @@ public class TrainingData
 					{
 						network.setGradientAndPropigateBack(false, eOutput);
 					}
+					network.updateBackpropWeights();
+					network.setInputErrorSignalForAllNodes(0);
 				}
 				
 				if(individualError == 0)

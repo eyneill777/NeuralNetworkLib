@@ -15,8 +15,8 @@ public class TestBackProp
 		
 		double[][] expectedOutputData = new double[4][1];
 		expectedOutputData[0] = new double[] {0.1};
-		expectedOutputData[1] = new double[] {.9};
-		expectedOutputData[2] = new double[] {.9};
+		expectedOutputData[1] = new double[] {.1};
+		expectedOutputData[2] = new double[] {.1};
 		expectedOutputData[3] = new double[] {.9};
 		
 		TrainingData trainingData = new TrainingData(inputData, expectedOutputData, 0);

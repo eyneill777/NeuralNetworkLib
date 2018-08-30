@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.w3c.dom.NodeList;
+
 public class NeuralNet 
 {
 	//double biasMomentumFriction = 1.1; @deprecated
@@ -219,18 +221,18 @@ public class NeuralNet
 			{
 				Node node = layer.nodeList.get(n);
 				if(cnt == 1)
-					node.setGradientAndPropigateBack(reset, cnt ,targetVal[n]);
+					node.setGradient(reset, cnt ,targetVal[n]);
 				else
-					node.setGradientAndPropigateBack(reset, cnt , -1);
-				System.out.print(node.inputErrorSignal+"\t");
+					node.setGradient(reset, cnt , -1);
+				//System.out.print(node.gradient+"\t");
 			}
-			System.out.println();
+			//System.out.println();
 			cnt++;
 		}
-		System.out.println();
+		//System.out.println();
 	}
 	
-	public void updateBackpropWeights(double learnRate)
+	public void updateBackpropWeights()
 	{
 		for(Layer l:layerList)
 		{
@@ -238,17 +240,42 @@ public class NeuralNet
 			{
 				if(!n.unbiased)
 				{
-					n.bias+=n.gradient;
+					n.biasGrad+=n.gradient;
 				}
 				for(Connection c:n.connectionList)
 				{
-					c.setGradient(c.node1.inputErrorSignal*learnRate*c.node2.getValue());
+					
+					c.setGradient(c.node1.getInputErrorSignal()*c.node2.getValue());
 					c.setWeight(c.getWeight()+c.getGradient());
+					System.out.println(c.getWeight());
 					if(c.getWeight()>c.maxWeight)
 						c.setWeight(c.maxWeight);
 					else if(c.getWeight() < c.minWeight)
 						c.setWeight(c.minWeight);
 				}
+			}
+		}
+	}
+	
+	public void setInputErrorSignalForAllNodes(double inputErrorSignal)
+	{
+		for(Layer l:layerList) 
+		{
+			for(Node n:l.nodeList)
+			{
+				n.setInputErrorSignal(inputErrorSignal);
+			}
+		}
+	}
+	
+	public void updateBackpropBiases()
+	{
+		for(Layer l:layerList)
+		{
+			for(Node n: l.nodeList)
+			{
+				//n.bias+=n.biasGrad*.005;
+				n.biasGrad = 0;
 			}
 		}
 	}

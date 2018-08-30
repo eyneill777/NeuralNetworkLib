@@ -6,7 +6,7 @@ public class BackPropigationTrainer
 	private TrainingData data;
 	int repeatsToStop = 30;
 	double error;
-	private double learnRate = .1;
+	private double learnRate = .01;
 	public double getLearnRate() {
 		return learnRate;
 	}
@@ -36,19 +36,13 @@ public class BackPropigationTrainer
 			}
 			catch(NullPointerException e){}
 			double error = data.testNetwork(network, false, "Backpropigation");
-			if(error > score)
-			{
-				//data.setLearnRate(data.getLearnRate()*(data.getLearnRate()));
-			}
-			else
-			{
-				network.updateBackpropWeights(learnRate);
-			}
+			network.updateBackpropBiases();
+			//network.updateBackpropWeights(learnRate);
 			score = error;
 			System.out.println("error "+error);
 			System.out.println();
 			long t = System.currentTimeMillis();
-			while(System.currentTimeMillis()<t+600)
+			while(System.currentTimeMillis()<t+100)
 			{}
 		}
 	}
